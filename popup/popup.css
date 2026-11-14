@@ -901,6 +901,98 @@ body {
   padding-right: 4px;
 }
 
+/* Selection Action Bar */
+.selection-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.selection-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selection-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selection-count-badge {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.selection-count-badge.active {
+  color: #070a13;
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Image Selection Checkbox */
+.image-select-checkbox {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: rgba(7, 10, 19, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  color: transparent;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(4px);
+}
+
+.image-card-pro:hover .image-select-checkbox,
+.image-list-row:hover .image-select-checkbox,
+.image-select-checkbox.checked {
+  border-color: var(--accent-cyan);
+}
+
+.image-select-checkbox:hover {
+  transform: scale(1.1);
+  border-color: #fff;
+}
+
+.image-select-checkbox.checked {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #070a13;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.image-card-pro.selected {
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+.image-list-row.selected {
+  background: rgba(56, 189, 248, 0.08) !important;
+  border-color: var(--accent-cyan) !important;
+}
+
 /* Grid Layout */
 .image-gallery.grid-layout {
   display: grid;

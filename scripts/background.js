@@ -61,11 +61,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // 4. Batch Download Files
   if (request.action === 'DOWNLOAD_FILE') {
-    chrome.downloads.download({
+    const downloadOpts = {
       url: request.url,
-      filename: request.filename || 'download',
       saveAs: request.saveAs || false
-    }, (downloadId) => {
+    };
+    if (request.filename) {
+      downloadOpts.filename = request.filename;
+    }
+    chrome.downloads.download(downloadOpts, (downloadId) => {
       if (chrome.runtime.lastError) {
         sendResponse({ success: false, error: chrome.runtime.lastError.message });
       } else {

@@ -6,11 +6,14 @@
 
 ## 🚀 Key Features
 
-### 1. 🖼️ Deep Image & Asset Extraction
+### 1. 🖼️ Deep Image & Asset Extraction + Custom Multi-Selection
 - Extracts all `<img>` tags, `srcset` high-res variants, `data-src` (lazy-loaded images), `<picture>` sources, and CSS `background-image` urls.
-- Interactive visual gallery with thumbnail previews, dimensions (`width × height`), format badges (JPG, PNG, WebP, SVG).
-- Filter images by format.
-- 1-click preview in new tab, 1-click copy image URL, single download, or **batch download** all images.
+- **Interactive Multi-Selection:** Check individual boxes on image cards (or `Ctrl/Shift + Click`) to pick only the exact images you want.
+- **Selective Batch Download:** Download ONLY your chosen images via **`⬇ Download Selected (X)`** without having to download the entire page's image library.
+- **1-Click Selection Deck:** Quick `✓ Select All` and `✗ Clear` buttons with a live dynamic counter (`X selected`).
+- **Selective URL Copying:** `Copy URLs (X)` button copies only the URLs of chosen images to your clipboard.
+- Filter images by format (JPG, PNG, WebP, SVG) or dimensions (High-Res >1000px, Icons <120px).
+- Fullscreen Lightbox modal with zoom, dimensions, and quick download.
 
 ### 2. 🗂️ Structured Cards & Feeds Extractor
 - Extracts grouped data units (e-commerce products, blog articles, feed cards) with Title, Image, Description, Price, and Link together in exact visual order.

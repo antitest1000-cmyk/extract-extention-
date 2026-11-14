@@ -372,7 +372,25 @@
             <button id="btnAutoScroll" class="btn-xs btn-outline" title="Auto-scroll webpage to capture infinite feeds">
               ⚡ Auto-Scroll
             </button>
-            <button id="btnDownloadSelectedImages" class="btn-xs btn-outline">
+          </div>
+        </div>
+
+        <!-- Interactive Selection & Download Deck -->
+        <div class="selection-action-bar" id="imagesSelectionBar">
+          <div class="selection-status-left">
+            <button id="btnSelectAllImages" class="btn-xs btn-secondary" title="Select all filtered images">
+              ✓ Select All
+            </button>
+            <button id="btnDeselectAllImages" class="btn-xs btn-secondary" title="Clear selection">
+              ✗ Clear
+            </button>
+            <span class="selection-count-badge" id="lblSelectedImagesCount">0 selected</span>
+          </div>
+          <div class="selection-actions-right">
+            <button id="btnCopySelectedImageUrls" class="btn-xs btn-secondary" style="display: none;" title="Copy selected image URLs">
+              Copy URLs
+            </button>
+            <button id="btnDownloadSelectedImages" class="btn-xs btn-outline" title="Download selected images">
               Download All
             </button>
           </div>

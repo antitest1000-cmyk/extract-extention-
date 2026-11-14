@@ -227,7 +227,13 @@
                 <option value="SVG">SVG</option>
               </select>
             </div>
-            <button id="btnDownloadAllImages" class="btn btn-secondary">Download All Images</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button id="btnViewerSelectAllImages" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px;">✓ Select All</button>
+              <button id="btnViewerDeselectImages" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px;">✗ Clear</button>
+              <span id="viewerSelectedCount" style="font-size: 11px; color: var(--text-dim); padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);">0 Selected</span>
+              <button id="btnViewerCopySelectedUrls" class="btn btn-secondary" style="display: none; font-size: 11px; padding: 6px 12px;">Copy URLs</button>
+              <button id="btnDownloadAllImages" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px;">Download All</button>
+            </div>
           </div>
           <div class="full-image-grid" id="fullImageGrid">
             <!-- Dynamic Grid -->

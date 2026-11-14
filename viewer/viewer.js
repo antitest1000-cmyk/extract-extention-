@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     activeView: 'view-overview',
     searchQuery: '',
     imageFormatFilter: 'all',
-    sitemapUrls: []
+    sitemapUrls: [],
+    selectedImageUrls: new Set()
   };
 
   const elements = {
@@ -68,8 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
     viewerSecretsCount: document.getElementById('viewerSecretsCount'),
     viewerSecretsList: document.getElementById('viewerSecretsList'),
 
-    // Images View
+    // Images View & Selection
     viewerImageFilter: document.getElementById('viewerImageFilter'),
+    btnViewerSelectAllImages: document.getElementById('btnViewerSelectAllImages'),
+    btnViewerDeselectImages: document.getElementById('btnViewerDeselectImages'),
+    viewerSelectedCount: document.getElementById('viewerSelectedCount'),
+    btnViewerCopySelectedUrls: document.getElementById('btnViewerCopySelectedUrls'),
     btnDownloadAllImages: document.getElementById('btnDownloadAllImages'),
     fullImageGrid: document.getElementById('fullImageGrid'),
 
@@ -292,6 +297,53 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Images Grid
    */
+  function toggleViewerImageSelection(url, card, cb) {
+    if (!url) return;
+    if (state.selectedImageUrls.has(url)) {
+      state.selectedImageUrls.delete(url);
+      if (card) card.classList.remove('selected');
+      if (cb) cb.classList.remove('checked');
+    } else {
+      state.selectedImageUrls.add(url);
+      if (card) card.classList.add('selected');
+      if (cb) cb.classList.add('checked');
+    }
+    updateViewerImageSelectionUI();
+  }
+
+  function updateViewerImageSelectionUI() {
+    const count = state.selectedImageUrls.size;
+    if (elements.viewerSelectedCount) {
+      elements.viewerSelectedCount.textContent = count === 0 ? '0 Selected' : `${count} Selected`;
+      if (count > 0) {
+        elements.viewerSelectedCount.style.color = '#38bdf8';
+        elements.viewerSelectedCount.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+        elements.viewerSelectedCount.style.background = 'rgba(56, 189, 248, 0.15)';
+      } else {
+        elements.viewerSelectedCount.style.color = 'var(--text-dim)';
+        elements.viewerSelectedCount.style.borderColor = 'var(--border-color)';
+        elements.viewerSelectedCount.style.background = 'rgba(255,255,255,0.05)';
+      }
+    }
+
+    if (elements.btnViewerCopySelectedUrls) {
+      elements.btnViewerCopySelectedUrls.style.display = count > 0 ? 'inline-flex' : 'none';
+      elements.btnViewerCopySelectedUrls.textContent = `Copy URLs (${count})`;
+    }
+
+    if (elements.btnDownloadAllImages) {
+      if (count > 0) {
+        elements.btnDownloadAllImages.innerHTML = `⬇ Download Selected (${count})`;
+        elements.btnDownloadAllImages.classList.add('btn-primary');
+        elements.btnDownloadAllImages.classList.remove('btn-secondary');
+      } else {
+        elements.btnDownloadAllImages.innerHTML = `Download All Images`;
+        elements.btnDownloadAllImages.classList.remove('btn-primary');
+        elements.btnDownloadAllImages.classList.add('btn-secondary');
+      }
+    }
+  }
+
   function renderImagesGrid() {
     if (!state.data || !state.data.images) return;
     let items = state.data.images;
@@ -310,28 +362,62 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    elements.fullImageGrid.innerHTML = items.map(img => `
-      <div class="viewer-img-card">
-        <div class="viewer-thumb-box">
-          <img src="${escapeHtml(img.url)}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%%22 x=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2212%22>Broken</text></svg>'">
-        </div>
-        <div class="viewer-img-info">
-          <div class="viewer-img-url" title="${escapeHtml(img.url)}">${escapeHtml(img.url)}</div>
-          <div class="viewer-img-actions">
-            <a href="${escapeHtml(img.url)}" target="_blank" rel="noopener">Preview</a>
-            <button class="btn-copy-url" data-url="${escapeHtml(img.url)}">Copy Link</button>
-            <button class="btn-dl-img" data-url="${escapeHtml(img.url)}">Download</button>
+    elements.fullImageGrid.innerHTML = items.map(img => {
+      const isSelected = state.selectedImageUrls.has(img.url);
+      return `
+        <div class="viewer-img-card ${isSelected ? 'selected' : ''}" data-url="${escapeHtml(img.url)}">
+          <div class="image-select-checkbox ${isSelected ? 'checked' : ''}" title="Select image">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="viewer-thumb-box">
+            <img src="${escapeHtml(img.url)}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%%22 x=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2212%22>Broken</text></svg>'">
+          </div>
+          <div class="viewer-img-info">
+            <div class="viewer-img-url" title="${escapeHtml(img.url)}">${escapeHtml(img.url)}</div>
+            <div class="viewer-img-actions">
+              <a href="${escapeHtml(img.url)}" target="_blank" rel="noopener">Preview</a>
+              <button class="btn-copy-url" data-url="${escapeHtml(img.url)}">Copy Link</button>
+              <button class="btn-dl-img" data-url="${escapeHtml(img.url)}">Download</button>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    // Attach listeners
+    elements.fullImageGrid.querySelectorAll('.viewer-img-card').forEach(card => {
+      const url = card.dataset.url;
+      const cb = card.querySelector('.image-select-checkbox');
+
+      if (cb) {
+        cb.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleViewerImageSelection(url, card, cb);
+        });
+      }
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.viewer-img-actions, a, button')) return;
+        toggleViewerImageSelection(url, card, cb);
+      });
+    });
 
     elements.fullImageGrid.querySelectorAll('.btn-copy-url').forEach(b => {
-      b.addEventListener('click', () => copyToClipboard(b.dataset.url));
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        copyToClipboard(b.dataset.url);
+      });
     });
     elements.fullImageGrid.querySelectorAll('.btn-dl-img').forEach(b => {
-      b.addEventListener('click', () => downloadUrl(b.dataset.url));
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadUrl(b.dataset.url);
+      });
     });
+
+    updateViewerImageSelectionUI();
   }
 
   /**
@@ -830,13 +916,52 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Select All
+    elements.btnViewerSelectAllImages?.addEventListener('click', () => {
+      let items = state.data?.images || [];
+      if (state.imageFormatFilter !== 'all') {
+        items = items.filter(img => img.format === state.imageFormatFilter);
+      }
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        items = items.filter(img => img.url.toLowerCase().includes(q));
+      }
+      items.forEach(i => state.selectedImageUrls.add(i.url));
+      renderImagesGrid();
+      showToast(`Selected ${items.length} images`);
+    });
+
+    // Clear Selection
+    elements.btnViewerDeselectImages?.addEventListener('click', () => {
+      state.selectedImageUrls.clear();
+      renderImagesGrid();
+      showToast('Cleared image selection');
+    });
+
+    // Copy Selected URLs
+    elements.btnViewerCopySelectedUrls?.addEventListener('click', () => {
+      if (state.selectedImageUrls.size === 0) return;
+      const urls = Array.from(state.selectedImageUrls);
+      copyToClipboard(urls.join('\n'));
+      showToast(`Copied ${urls.length} URLs!`);
+    });
+
+    // Download Selected (or All) Images
     elements.btnDownloadAllImages.addEventListener('click', () => {
       if (!state.data || !state.data.images) return;
-      const imgs = state.data.images.slice(0, 50);
-      imgs.forEach((img, idx) => {
-        setTimeout(() => downloadUrl(img.url), idx * 250);
-      });
-      showToast(`Downloading ${imgs.length} images...`);
+      if (state.selectedImageUrls.size > 0) {
+        const selected = Array.from(state.selectedImageUrls);
+        showToast(`Downloading ${selected.length} selected images...`);
+        selected.forEach((url, idx) => {
+          setTimeout(() => downloadUrl(url), idx * 250);
+        });
+      } else {
+        const imgs = state.data.images.slice(0, 50);
+        showToast(`Downloading ${imgs.length} images...`);
+        imgs.forEach((img, idx) => {
+          setTimeout(() => downloadUrl(img.url), idx * 250);
+        });
+      }
     });
   }
 

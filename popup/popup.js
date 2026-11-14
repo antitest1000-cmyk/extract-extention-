@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     linksTypeFilter: 'all',
     sitemapData: null,
     crawlData: null,
-    isAutoScrolling: false
+    isAutoScrolling: false,
+    selectedImageUrls: new Set()
   };
 
   // DOM Elements
@@ -102,11 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
     techStackTags: document.getElementById('techStackTags'),
     headingsList: document.getElementById('headingsList'),
 
-    // Images Tab
+    // Images Tab & Selection
     imagesGalleryContainer: document.getElementById('imagesGalleryContainer'),
     imagesGallery: document.getElementById('imagesGallery'),
     imageFormatFilters: document.getElementById('imageFormatFilters'),
     btnAutoScroll: document.getElementById('btnAutoScroll'),
+    imagesSelectionBar: document.getElementById('imagesSelectionBar'),
+    btnSelectAllImages: document.getElementById('btnSelectAllImages'),
+    btnDeselectAllImages: document.getElementById('btnDeselectAllImages'),
+    lblSelectedImagesCount: document.getElementById('lblSelectedImagesCount'),
+    btnCopySelectedImageUrls: document.getElementById('btnCopySelectedImageUrls'),
     btnDownloadSelectedImages: document.getElementById('btnDownloadSelectedImages'),
 
     // Media Tab (Video & Audio)
@@ -481,6 +487,59 @@ document.addEventListener('DOMContentLoaded', () => {
    * RENDER IMAGES TAB (PRO REDESIGN - NO COLLAPSED BOXES)
    * =========================================================================
    */
+  /**
+   * Toggle selection state for an image
+   */
+  function toggleImageSelection(url, card, cb) {
+    if (!url) return;
+    if (state.selectedImageUrls.has(url)) {
+      state.selectedImageUrls.delete(url);
+      if (card) card.classList.remove('selected');
+      if (cb) cb.classList.remove('checked');
+    } else {
+      state.selectedImageUrls.add(url);
+      if (card) card.classList.add('selected');
+      if (cb) cb.classList.add('checked');
+    }
+    updateImageSelectionUI();
+  }
+
+  /**
+   * Update selection counter and action buttons in Images tab
+   */
+  function updateImageSelectionUI() {
+    const count = state.selectedImageUrls.size;
+    if (elements.lblSelectedImagesCount) {
+      elements.lblSelectedImagesCount.textContent = count === 0 ? '0 selected' : `${count} selected`;
+      if (count > 0) {
+        elements.lblSelectedImagesCount.classList.add('active');
+      } else {
+        elements.lblSelectedImagesCount.classList.remove('active');
+      }
+    }
+
+    if (elements.btnCopySelectedImageUrls) {
+      if (count > 0) {
+        elements.btnCopySelectedImageUrls.style.display = 'inline-flex';
+        elements.btnCopySelectedImageUrls.textContent = `Copy URLs (${count})`;
+      } else {
+        elements.btnCopySelectedImageUrls.style.display = 'none';
+      }
+    }
+
+    if (elements.btnDownloadSelectedImages) {
+      if (count > 0) {
+        elements.btnDownloadSelectedImages.innerHTML = `⬇ Download Selected (${count})`;
+        elements.btnDownloadSelectedImages.classList.remove('btn-outline');
+        elements.btnDownloadSelectedImages.classList.add('btn-primary');
+      } else {
+        elements.btnDownloadSelectedImages.innerHTML = `Download All`;
+        elements.btnDownloadSelectedImages.classList.remove('btn-primary');
+        elements.btnDownloadSelectedImages.classList.add('btn-outline');
+      }
+    }
+  }
+
   function renderImagesTab() {
     if (!state.pageData || !state.pageData.images) return;
 
@@ -518,8 +577,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // GRID VIEW
       elements.imagesGallery.innerHTML = items.map((img, idx) => {
         const dims = (img.width && img.height) ? `${img.width}×${img.height}` : (img.format || 'IMG');
+        const isSelected = state.selectedImageUrls.has(img.url);
         return `
-          <div class="image-card-pro" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}" data-idx="${idx}">
+          <div class="image-card-pro ${isSelected ? 'selected' : ''}" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}" data-idx="${idx}">
+            <div class="image-select-checkbox ${isSelected ? 'checked' : ''}" title="Select image">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
             <div class="image-thumb-area">
               <img src="${escapeHtml(img.url)}" 
                    referrerpolicy="no-referrer" 
@@ -559,8 +624,14 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.imagesGallery.innerHTML = items.map((img, idx) => {
         const dims = (img.width && img.height) ? `${img.width}×${img.height}px` : (img.format || 'IMG');
         const filename = getUrlFilename(img.url);
+        const isSelected = state.selectedImageUrls.has(img.url);
         return `
-          <div class="image-list-row" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}">
+          <div class="image-list-row ${isSelected ? 'selected' : ''}" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}">
+            <div class="image-select-checkbox ${isSelected ? 'checked' : ''}" style="position: static; flex-shrink: 0;" title="Select image">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
             <img class="image-mini-thumb" src="${escapeHtml(img.url)}" referrerpolicy="no-referrer" loading="lazy">
             <div class="image-list-details">
               <div class="image-list-title" title="${escapeHtml(img.url)}">${escapeHtml(filename)}</div>
@@ -582,6 +653,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = card.dataset.url;
       const dims = card.dataset.dims;
       const imgEl = card.querySelector('img');
+      const cb = card.querySelector('.image-select-checkbox');
+
+      // Checkbox click
+      if (cb) {
+        cb.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleImageSelection(url, card, cb);
+        });
+      }
 
       // Graceful error fallback if image protected or blocked by hotlink
       if (imgEl) {
@@ -617,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Download
+      // Single Download
       card.querySelectorAll('.btn-dl-card').forEach(b => {
         b.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -625,11 +705,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // Clicking card body also opens lightbox in grid view
-      if (state.viewMode === 'grid') {
-        card.addEventListener('click', () => openLightbox(url, dims));
-      }
+      // Clicking card body: Ctrl/Shift/Cmd click toggles selection, otherwise opens lightbox in grid view
+      card.addEventListener('click', (e) => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleImageSelection(url, card, cb);
+          return;
+        }
+        if (state.viewMode === 'grid' && !e.target.closest('.image-hover-overlay, .image-select-checkbox, .image-quick-copy')) {
+          openLightbox(url, dims);
+        }
+      });
     });
+
+    updateImageSelectionUI();
   }
 
   /**
@@ -1861,14 +1951,61 @@ document.addEventListener('DOMContentLoaded', () => {
       downloadFile(csv, `${state.domain}-leads.csv`, 'text/csv');
     });
 
-    // Batch download images
-    elements.btnDownloadSelectedImages.addEventListener('click', () => {
+    // Select All Images
+    elements.btnSelectAllImages?.addEventListener('click', () => {
+      let items = state.pageData?.images || [];
+      if (state.imageFormatFilter !== 'all') {
+        if (state.imageFormatFilter === 'highres') {
+          items = items.filter(img => (img.width >= 1000 || img.height >= 800));
+        } else if (state.imageFormatFilter === 'icons') {
+          items = items.filter(img => (img.width > 0 && img.width <= 120 && img.height <= 120));
+        } else {
+          items = items.filter(img => img.format === state.imageFormatFilter);
+        }
+      }
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        items = items.filter(img => img.url.toLowerCase().includes(q) || (img.alt && img.alt.toLowerCase().includes(q)));
+      }
+
+      items.forEach(img => state.selectedImageUrls.add(img.url));
+      renderImagesTab();
+      showToast(`Selected ${items.length} images`);
+    });
+
+    // Clear Selection
+    elements.btnDeselectAllImages?.addEventListener('click', () => {
+      state.selectedImageUrls.clear();
+      renderImagesTab();
+      showToast('Cleared image selection');
+    });
+
+    // Copy Selected URLs
+    elements.btnCopySelectedImageUrls?.addEventListener('click', () => {
+      if (state.selectedImageUrls.size === 0) return;
+      const urls = Array.from(state.selectedImageUrls);
+      copyToClipboard(urls.join('\n'));
+      showToast(`Copied ${urls.length} selected URLs!`);
+    });
+
+    // Download Selected (or All) Images
+    elements.btnDownloadSelectedImages?.addEventListener('click', () => {
       if (!state.pageData || !state.pageData.images) return;
-      const imgs = state.pageData.images.slice(0, 40);
-      imgs.forEach((img, idx) => {
-        setTimeout(() => downloadUrl(img.url), idx * 250);
-      });
-      showToast(`Downloading ${imgs.length} images...`);
+
+      if (state.selectedImageUrls.size > 0) {
+        const selected = Array.from(state.selectedImageUrls);
+        showToast(`Downloading ${selected.length} selected images...`);
+        selected.forEach((url, idx) => {
+          setTimeout(() => downloadUrl(url), idx * 250);
+        });
+      } else {
+        // Download all images up to 40
+        const imgs = state.pageData.images.slice(0, 40);
+        showToast(`Downloading all ${imgs.length} images...`);
+        imgs.forEach((img, idx) => {
+          setTimeout(() => downloadUrl(img.url), idx * 250);
+        });
+      }
     });
 
     // Batch download media
