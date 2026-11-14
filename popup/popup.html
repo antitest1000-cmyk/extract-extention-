@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniExtract Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m4.93 4.93 14.14 14.14"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <path d="M2 12h20"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">OmniExtract <span class="pro-tag">PRO</span></h1>
+            <span class="pulse-dot" title="Live Extraction Active"></span>
+          </div>
+          <p class="brand-sub" id="currentDomain">Connecting to tab...</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnRefresh" class="icon-btn" title="Re-extract Active Page">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+        </button>
+        <button id="btnOpenViewer" class="icon-btn" title="Open Full-Screen Pro Dashboard">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="tab-overview">
+        <span>Overview</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-images">
+        <span>Images</span>
+        <span class="badge" id="badgeImages">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-media">
+        <span>Video & Audio</span>
+        <span class="badge badge-rose" id="badgeMedia">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-cards">
+        <span>Cards</span>
+        <span class="badge badge-amber" id="badgeCards">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-cloud">
+        <span>Cloud & APIs</span>
+        <span class="badge badge-accent" id="badgeCloud">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-links">
+        <span>Links</span>
+        <span class="badge" id="badgeLinks">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-sitemap">
+        <span>Sitemap</span>
+        <span class="badge badge-purple" id="badgeSitemap">XML</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-crawler">
+        <span>Spider</span>
+        <span class="badge badge-green">Site</span>
+      </button>
+    </nav>
+
+    <!-- Global Search & Action Toolbar -->
+    <div class="search-toolbar" id="searchToolbar">
+      <div class="search-input-wrapper">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input type="text" id="globalSearchInput" placeholder="Filter items by keyword or URL..." autocomplete="off">
+        <button id="btnClearSearch" class="clear-search-btn" title="Clear">✕</button>
+      </div>
+
+      <!-- View layout toggle for images & media -->
+      <div class="view-toggle-wrapper" id="viewToggleWrapper">
+        <button id="btnViewGrid" class="icon-toggle active" title="Grid View">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>
+          </svg>
+        </button>
+        <button id="btnViewList" class="icon-toggle" title="List View">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Export Menu -->
+      <div class="action-dropdown-wrapper">
+        <button id="btnExport" class="btn-sm btn-secondary">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Export
+        </button>
+        <div class="dropdown-menu" id="exportMenu">
+          <div class="dropdown-item" id="exportJson">Export Tab as JSON</div>
+          <div class="dropdown-item" id="exportCsv">Export Tab as CSV</div>
+          <div class="dropdown-item" id="exportTxt">Export URLs as TXT</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" id="exportAllJson">Export Complete Site Data (JSON)</div>
+        </div>
+      </div>
+
+      <button id="btnCopyAll" class="btn-sm btn-primary" title="Copy visible URLs">Copy</button>
+    </div>
+
+    <!-- Main Scrollable Content Area -->
+    <main class="tab-content-area">
+
+      <!-- TAB 1: OVERVIEW & SEO -->
+      <section id="tab-overview" class="tab-pane active">
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Page Metadata & SEO</h3>
+            <span class="chip chip-blue" id="lblDocStatus">200 OK</span>
+          </div>
+          <div class="meta-field">
+            <label>Title:</label>
+            <div class="field-value selectable" id="metaTitle">—</div>
+          </div>
+          <div class="meta-field">
+            <label>Description:</label>
+            <div class="field-value selectable" id="metaDescription">—</div>
+          </div>
+          <div class="meta-field">
+            <label>Canonical URL:</label>
+            <div class="field-value truncate selectable" id="metaCanonical">—</div>
+          </div>
+          <div class="meta-field">
+            <label>Keywords / Author:</label>
+            <div class="field-value selectable" id="metaKeywords">—</div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div class="metric-num" id="statWords">0</div>
+            <div class="metric-label">Words</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="statCards">0</div>
+            <div class="metric-label">Cards</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="statImages">0</div>
+            <div class="metric-label">Images</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="statMedia">0</div>
+            <div class="metric-label">Video/Audio</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="statCloud">0</div>
+            <div class="metric-label">Cloud Links</div>
+          </div>
+        </div>
+
+        <!-- Design Assets: Color Palette & Typography -->
+        <div class="section-card" id="designAssetsCard">
+          <div class="card-header">
+            <h3>Brand Colors & Typography</h3>
+          </div>
+          <div class="palette-row" id="paletteRow">
+            <span class="tag-empty">Scanning color palette...</span>
+          </div>
+          <div class="fonts-row" id="fontsRow">
+            <!-- Font families -->
+          </div>
+        </div>
+
+        <!-- Social & OpenGraph -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Social & OpenGraph Banner</h3>
+          </div>
+          <div class="og-preview-card" id="ogPreviewContainer">
+            <div class="og-img-box" id="ogImageBox">No OG Image</div>
+            <div class="og-info">
+              <div class="og-title" id="ogTitle">—</div>
+              <div class="og-desc" id="ogDesc">—</div>
+              <div class="og-site" id="ogSite">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detected Technologies -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Detected Technologies</h3>
+          </div>
+          <div class="tags-container" id="techStackTags">
+            <span class="tag-empty">Scanning stack...</span>
+          </div>
+        </div>
+
+        <!-- Headings Hierarchy -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Headings Hierarchy</h3>
+          </div>
+          <div class="headings-list" id="headingsList">
+            <div class="empty-state">No headings found</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: IMAGES -->
+      <section id="tab-images" class="tab-pane">
+        <div class="sub-filter-bar">
+          <div class="filter-pills" id="imageFormatFilters">
+            <button class="pill active" data-format="all">All</button>
+            <button class="pill" data-format="JPG">JPG</button>
+            <button class="pill" data-format="PNG">PNG</button>
+            <button class="pill" data-format="WEBP">WEBP</button>
+            <button class="pill" data-format="SVG">SVG</button>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btnAutoScroll" class="btn-xs btn-outline" title="Auto-scroll webpage to capture infinite feeds">
+              ⚡ Auto-Scroll
+            </button>
+            <button id="btnDownloadSelectedImages" class="btn-xs btn-outline">
+              Download All
+            </button>
+          </div>
+        </div>
+        
+        <!-- Gallery Container -->
+        <div class="image-gallery-container" id="imagesGalleryContainer">
+          <div class="image-gallery grid-layout" id="imagesGallery">
+            <!-- Dynamic Image Cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: VIDEO & AUDIO (NEW FEATURE) -->
+      <section id="tab-media" class="tab-pane">
+        <div class="sub-filter-bar">
+          <div class="filter-pills" id="mediaKindFilters">
+            <button class="pill active" data-kind="all">All Media</button>
+            <button class="pill" data-kind="video">Videos</button>
+            <button class="pill" data-kind="audio">Audio Tracks</button>
+            <button class="pill" data-kind="embed">Embeds</button>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btnAutoScrollMedia" class="btn-xs btn-outline" title="Auto-scroll webpage to capture new media">
+              ⚡ Auto-Scroll
+            </button>
+            <button id="btnDownloadAllMedia" class="btn-xs btn-outline">
+              Save All Files
+            </button>
+          </div>
+        </div>
+        
+        <div class="media-list-container" id="mediaListContainer">
+          <!-- Dynamic Video/Audio Cards -->
+        </div>
+      </section>
+
+      <!-- TAB 4: STRUCTURED CARDS & REPEATING ENTITIES (TITLE + IMAGE + DESC + LINK) -->
+      <section id="tab-cards" class="tab-pane">
+        <div class="sub-filter-bar">
+          <div class="filter-pills" id="cardViewFilters">
+            <button class="pill active" data-cardview="cards">Cards View</button>
+            <button class="pill" data-cardview="json">JSON Tree View</button>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btnPickContainer" class="btn-xs btn-outline" style="border-color: var(--accent-amber); color: var(--accent-amber);" title="Click any element on page to extract it directly">
+              🎯 Pick from Page
+            </button>
+            <button id="btnAutoScrollCards" class="btn-xs btn-outline" title="Auto-scroll webpage to capture infinite feeds">
+              ⚡ Auto-Scroll
+            </button>
+            <button id="btnCopyAllCardsJson" class="btn-xs btn-outline" title="Copy all cards as structured JSON array">
+              Copy JSON
+            </button>
+            <button id="btnCopyAllCardsText" class="btn-xs btn-outline" title="Copy all cards as formatted text blocks">
+              Copy All Text
+            </button>
+          </div>
+        </div>
+
+        <!-- Cards Visual Container -->
+        <div class="cards-view-container" id="cardsViewContainer">
+          <div class="cards-grid" id="cardsGrid">
+            <!-- Dynamic Entity Cards -->
+          </div>
+        </div>
+
+        <!-- Cards JSON Container (hidden by default) -->
+        <div class="cards-json-container" id="cardsJsonContainer" style="display: none;">
+          <div class="json-code-box">
+            <div class="json-header">
+              <span class="json-title">Structured Cards Hierarchy (Clean JSON)</span>
+              <button id="btnCopyRawCardsJson" class="btn-xs btn-primary">Copy JSON Array</button>
+            </div>
+            <pre class="json-code-pre" id="cardsJsonPre"><code>[]</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: CLOUD & APIS -->
+      <section id="tab-cloud" class="tab-pane">
+        <div class="sub-filter-bar">
+          <div class="filter-pills" id="cloudProviderFilters">
+            <button class="pill active" data-provider="all">All Providers</button>
+            <button class="pill" data-provider="AWS">AWS</button>
+            <button class="pill" data-provider="Google Cloud">GCP / Firebase</button>
+            <button class="pill" data-provider="Microsoft Azure">Azure</button>
+            <button class="pill" data-provider="Cloudflare">Cloudflare</button>
+            <button class="pill" data-provider="GitHub">GitHub</button>
+          </div>
+        </div>
+        <div class="list-container" id="cloudLinksList">
+          <!-- Dynamic Cloud Rows -->
+        </div>
+      </section>
+
+      <!-- TAB 5: ALL LINKS -->
+      <section id="tab-links" class="tab-pane">
+        <div class="sub-filter-bar">
+          <div class="filter-pills" id="linksTypeFilters">
+            <button class="pill active" data-type="all">All</button>
+            <button class="pill" data-type="internal">Internal</button>
+            <button class="pill" data-type="external">External</button>
+            <button class="pill" data-type="documents">Documents (PDF/Doc)</button>
+            <button class="pill" data-type="contacts">Emails & Social</button>
+          </div>
+        </div>
+        <div class="list-container" id="allLinksList">
+          <!-- Dynamic Link Rows -->
+        </div>
+      </section>
+
+      <!-- TAB 6: SITEMAP EXTRACTOR -->
+      <section id="tab-sitemap" class="tab-pane">
+        <div class="sitemap-control-card">
+          <div class="input-with-button">
+            <input type="url" id="inputCustomSitemap" placeholder="Auto-detect or enter sitemap.xml URL...">
+            <button id="btnFetchSitemap" class="btn-primary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              Extract Sitemap
+            </button>
+          </div>
+          <div class="sitemap-status-row" id="sitemapStatusRow">
+            <span class="status-indicator"></span>
+            <span id="sitemapStatusText">Ready to discover sitemap.xml from robots.txt or standard paths</span>
+          </div>
+        </div>
+
+        <div class="sitemap-results-container" id="sitemapResultsBox">
+          <div class="sitemap-meta-bar" id="sitemapMetaBar" style="display: none;">
+            <span id="sitemapCount">0 URLs Found</span>
+            <div class="sitemap-actions">
+              <button id="btnExportSitemapTxt" class="btn-xs btn-secondary">Export URLs (.txt)</button>
+              <button id="btnExportSitemapCsv" class="btn-xs btn-secondary">Export CSV</button>
+            </div>
+          </div>
+          <div class="list-container" id="sitemapUrlsList">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/>
+              </svg>
+              <p>Click "Extract Sitemap" to search and recursively extract every URL from the site's XML sitemaps.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: WHOLE SITE SPIDER CRAWLER -->
+      <section id="tab-crawler" class="tab-pane">
+        <div class="crawler-control-card">
+          <div class="crawler-settings">
+            <div class="setting-item">
+              <label>Max Pages to Crawl:</label>
+              <select id="selectMaxPages">
+                <option value="10">10 Pages (Quick)</option>
+                <option value="25" selected>25 Pages (Standard)</option>
+                <option value="50">50 Pages (Deep)</option>
+                <option value="100">100 Pages (Full Site)</option>
+              </select>
+            </div>
+            <div class="crawler-btns">
+              <button id="btnStartCrawl" class="btn-primary">Start Site Crawl</button>
+              <button id="btnStopCrawl" class="btn-danger" style="display: none;">Stop Crawl</button>
+            </div>
+          </div>
+
+          <div class="progress-bar-container" id="crawlProgressContainer" style="display: none;">
+            <div class="progress-bar">
+              <div class="progress-fill" id="crawlProgressFill"></div>
+            </div>
+            <div class="progress-text" id="crawlProgressText">Crawling...</div>
+          </div>
+        </div>
+
+        <div class="crawler-results-area" id="crawlerResultsArea">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            <p>Start a crawl to spider the entire website, extracting images, media, links, and cloud endpoints from multiple pages.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Interactive Lightbox Modal for Full Image Inspection -->
+    <div class="lightbox-modal" id="imageLightboxModal">
+      <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+      <div class="lightbox-dialog">
+        <button class="lightbox-close" id="lightboxCloseBtn">✕</button>
+        <div class="lightbox-img-wrapper">
+          <img id="lightboxImg" src="" alt="Zoom preview">
+        </div>
+        <div class="lightbox-footer">
+          <div class="lightbox-info">
+            <span class="lightbox-dims" id="lightboxDims">1920×1080px</span>
+            <span class="lightbox-url truncate" id="lightboxUrl">https://...</span>
+          </div>
+          <div class="lightbox-actions">
+            <button id="lightboxCopyBtn" class="btn-xs btn-secondary">Copy Link</button>
+            <button id="lightboxDownloadBtn" class="btn-xs btn-primary">Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toastMessage">Copied to clipboard!</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

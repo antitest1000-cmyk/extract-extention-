@@ -1,0 +1,1459 @@
+/**
+ * OmniExtract Pro - Popup Controller (Enhanced)
+ * Manages UI, Grid/List layouts, Lightbox, Media (Video/Audio) players, Palettes, and Exports.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Application State
+  const state = {
+    currentTab: 'tab-overview',
+    pageData: null,
+    activeUrl: '',
+    domain: '',
+    searchQuery: '',
+    viewMode: 'grid', // 'grid' or 'list'
+    cardViewMode: 'cards', // 'cards' or 'json'
+    imageFormatFilter: 'all',
+    mediaKindFilter: 'all',
+    cloudProviderFilter: 'all',
+    linksTypeFilter: 'all',
+    sitemapData: null,
+    crawlData: null,
+    isAutoScrolling: false
+  };
+
+  // DOM Elements
+  const elements = {
+    currentDomain: document.getElementById('currentDomain'),
+    btnRefresh: document.getElementById('btnRefresh'),
+    btnOpenViewer: document.getElementById('btnOpenViewer'),
+    globalSearchInput: document.getElementById('globalSearchInput'),
+    btnClearSearch: document.getElementById('btnClearSearch'),
+    viewToggleWrapper: document.getElementById('viewToggleWrapper'),
+    btnViewGrid: document.getElementById('btnViewGrid'),
+    btnViewList: document.getElementById('btnViewList'),
+    btnExport: document.getElementById('btnExport'),
+    exportMenu: document.getElementById('exportMenu'),
+    btnCopyAll: document.getElementById('btnCopyAll'),
+    toast: document.getElementById('toastMessage'),
+
+    // Badges
+    badgeImages: document.getElementById('badgeImages'),
+    badgeMedia: document.getElementById('badgeMedia'),
+    badgeCards: document.getElementById('badgeCards'),
+    badgeCloud: document.getElementById('badgeCloud'),
+    badgeLinks: document.getElementById('badgeLinks'),
+    badgeSitemap: document.getElementById('badgeSitemap'),
+
+    // Overview Tab
+    metaTitle: document.getElementById('metaTitle'),
+    metaDescription: document.getElementById('metaDescription'),
+    metaCanonical: document.getElementById('metaCanonical'),
+    metaKeywords: document.getElementById('metaKeywords'),
+    statWords: document.getElementById('statWords'),
+    statCards: document.getElementById('statCards'),
+    statImages: document.getElementById('statImages'),
+    statMedia: document.getElementById('statMedia'),
+    statCloud: document.getElementById('statCloud'),
+    paletteRow: document.getElementById('paletteRow'),
+    fontsRow: document.getElementById('fontsRow'),
+    ogTitle: document.getElementById('ogTitle'),
+    ogDesc: document.getElementById('ogDesc'),
+    ogSite: document.getElementById('ogSite'),
+    ogImageBox: document.getElementById('ogImageBox'),
+    techStackTags: document.getElementById('techStackTags'),
+    headingsList: document.getElementById('headingsList'),
+
+    // Images Tab
+    imagesGalleryContainer: document.getElementById('imagesGalleryContainer'),
+    imagesGallery: document.getElementById('imagesGallery'),
+    imageFormatFilters: document.getElementById('imageFormatFilters'),
+    btnAutoScroll: document.getElementById('btnAutoScroll'),
+    btnDownloadSelectedImages: document.getElementById('btnDownloadSelectedImages'),
+
+    // Media Tab (Video & Audio)
+    mediaListContainer: document.getElementById('mediaListContainer'),
+    mediaKindFilters: document.getElementById('mediaKindFilters'),
+    btnAutoScrollMedia: document.getElementById('btnAutoScrollMedia'),
+    btnDownloadAllMedia: document.getElementById('btnDownloadAllMedia'),
+
+    // Cards Tab (Structured Entities)
+    cardsViewContainer: document.getElementById('cardsViewContainer'),
+    cardsGrid: document.getElementById('cardsGrid'),
+    cardsJsonContainer: document.getElementById('cardsJsonContainer'),
+    cardsJsonPre: document.getElementById('cardsJsonPre'),
+    cardViewFilters: document.getElementById('cardViewFilters'),
+    btnPickContainer: document.getElementById('btnPickContainer'),
+    btnAutoScrollCards: document.getElementById('btnAutoScrollCards'),
+    btnCopyAllCardsJson: document.getElementById('btnCopyAllCardsJson'),
+    btnCopyAllCardsText: document.getElementById('btnCopyAllCardsText'),
+    btnCopyRawCardsJson: document.getElementById('btnCopyRawCardsJson'),
+
+    // Cloud Tab
+    cloudLinksList: document.getElementById('cloudLinksList'),
+    cloudProviderFilters: document.getElementById('cloudProviderFilters'),
+
+    // Links Tab
+    allLinksList: document.getElementById('allLinksList'),
+    linksTypeFilters: document.getElementById('linksTypeFilters'),
+
+    // Sitemap Tab
+    inputCustomSitemap: document.getElementById('inputCustomSitemap'),
+    btnFetchSitemap: document.getElementById('btnFetchSitemap'),
+    sitemapStatusRow: document.getElementById('sitemapStatusRow'),
+    sitemapStatusText: document.getElementById('sitemapStatusText'),
+    sitemapMetaBar: document.getElementById('sitemapMetaBar'),
+    sitemapCount: document.getElementById('sitemapCount'),
+    sitemapUrlsList: document.getElementById('sitemapUrlsList'),
+    btnExportSitemapTxt: document.getElementById('btnExportSitemapTxt'),
+    btnExportSitemapCsv: document.getElementById('btnExportSitemapCsv'),
+
+    // Crawler Tab
+    selectMaxPages: document.getElementById('selectMaxPages'),
+    btnStartCrawl: document.getElementById('btnStartCrawl'),
+    btnStopCrawl: document.getElementById('btnStopCrawl'),
+    crawlProgressContainer: document.getElementById('crawlProgressContainer'),
+    crawlProgressFill: document.getElementById('crawlProgressFill'),
+    crawlProgressText: document.getElementById('crawlProgressText'),
+    crawlerResultsArea: document.getElementById('crawlerResultsArea'),
+
+    // Lightbox
+    imageLightboxModal: document.getElementById('imageLightboxModal'),
+    lightboxBackdrop: document.getElementById('lightboxBackdrop'),
+    lightboxCloseBtn: document.getElementById('lightboxCloseBtn'),
+    lightboxImg: document.getElementById('lightboxImg'),
+    lightboxDims: document.getElementById('lightboxDims'),
+    lightboxUrl: document.getElementById('lightboxUrl'),
+    lightboxCopyBtn: document.getElementById('lightboxCopyBtn'),
+    lightboxDownloadBtn: document.getElementById('lightboxDownloadBtn')
+  };
+
+  init();
+
+  async function init() {
+    setupTabNavigation();
+    setupEventListeners();
+    setupLightbox();
+    await loadActiveTabData();
+    checkAutoScrollStatus();
+  }
+
+  /**
+   * Loads data from active tab
+   */
+  async function loadActiveTabData() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab || !tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://')) {
+        elements.currentDomain.textContent = 'Browser Internal Page';
+        showToast('Open a regular website to extract data');
+        return;
+      }
+
+      state.activeUrl = tab.url;
+      const parsedUrl = new URL(tab.url);
+      state.domain = parsedUrl.hostname;
+      elements.currentDomain.textContent = state.domain;
+
+      chrome.tabs.sendMessage(tab.id, { action: 'EXTRACT_PAGE_DATA' }, (response) => {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['scripts/content.js']
+          }, () => {
+            if (chrome.runtime.lastError) {
+              elements.currentDomain.textContent = 'Cannot extract on this page';
+              return;
+            }
+            setTimeout(() => {
+              chrome.tabs.sendMessage(tab.id, { action: 'EXTRACT_PAGE_DATA' }, (res2) => {
+                if (res2 && res2.success) {
+                  populateData(res2.data);
+                } else {
+                  elements.currentDomain.textContent = 'Please reload webpage (F5)';
+                  showToast('Please reload active tab (F5) to enable OmniExtract', 4000);
+                }
+              });
+            }, 150);
+          });
+        } else {
+          populateData(response.data);
+        }
+      });
+
+    } catch (err) {
+      console.error('[OmniExtract] Tab error:', err);
+      elements.currentDomain.textContent = 'Error connecting to tab';
+    }
+  }
+
+  /**
+   * Populate UI with extracted data
+   */
+  function populateData(data) {
+    state.pageData = data;
+
+    // Badges
+    elements.badgeImages.textContent = (data.images && data.images.length) || 0;
+    elements.badgeMedia.textContent = (data.media && data.media.length) || 0;
+    elements.badgeCards.textContent = (data.cards && data.cards.length) || 0;
+    elements.badgeCloud.textContent = (data.cloudLinks && data.cloudLinks.length) || 0;
+    elements.badgeLinks.textContent = (data.links && data.links.length) || 0;
+
+    // In-page XML Sitemap auto-detection
+    if (data.inPageSitemap && data.inPageSitemap.count > 0) {
+      elements.badgeSitemap.textContent = data.inPageSitemap.count;
+      elements.inputCustomSitemap.value = data.inPageSitemap.sourceUrl;
+      state.sitemapData = {
+        origin: state.domain,
+        discoveredSources: [data.inPageSitemap.sourceUrl],
+        totalUrls: data.inPageSitemap.count,
+        urls: data.inPageSitemap.urls
+      };
+      elements.sitemapStatusText.textContent = `Extracted ${data.inPageSitemap.count} ${data.inPageSitemap.isIndex ? 'sub-sitemaps from index' : 'URLs'} from this page!`;
+      elements.sitemapMetaBar.style.display = 'flex';
+      elements.sitemapCount.textContent = `${data.inPageSitemap.count.toLocaleString()} URLs Found`;
+      renderSitemapUrls(data.inPageSitemap.urls);
+    } else if (data.url && (data.url.endsWith('.xml') || data.url.includes('sitemap'))) {
+      elements.inputCustomSitemap.value = data.url;
+    }
+
+    // Overview Tab
+    elements.metaTitle.textContent = data.metadata.title || 'Untitled';
+    elements.metaDescription.textContent = data.metadata.description || 'No description meta tag found.';
+    elements.metaCanonical.textContent = data.metadata.canonical || data.url;
+    elements.metaKeywords.textContent = data.metadata.keywords || (data.metadata.author ? `Author: ${data.metadata.author}` : 'None detected');
+
+    elements.statWords.textContent = (data.stats.wordCount || 0).toLocaleString();
+    elements.statCards.textContent = (data.cards && data.cards.length) || 0;
+    elements.statImages.textContent = (data.images && data.images.length) || 0;
+    elements.statMedia.textContent = (data.media && data.media.length) || 0;
+    elements.statCloud.textContent = (data.cloudLinks && data.cloudLinks.length) || 0;
+
+    // Color Palette & Fonts
+    renderDesignAssets(data.designAssets);
+
+    // OpenGraph
+    const og = data.metadata.openGraph || {};
+    elements.ogTitle.textContent = og['og:title'] || data.metadata.title || 'No OG Title';
+    elements.ogDesc.textContent = og['og:description'] || data.metadata.description || 'No OG Description';
+    elements.ogSite.textContent = og['og:site_name'] || state.domain;
+
+    if (og['og:image']) {
+      elements.ogImageBox.style.backgroundImage = `url("${og['og:image']}")`;
+      elements.ogImageBox.textContent = '';
+    } else {
+      elements.ogImageBox.style.backgroundImage = 'none';
+      elements.ogImageBox.textContent = 'No OG Image';
+    }
+
+    // Tech stack
+    if (data.technologies && data.technologies.length > 0) {
+      elements.techStackTags.innerHTML = data.technologies
+        .map(t => `<span class="tag-badge">${escapeHtml(t)}</span>`)
+        .join('');
+    } else {
+      elements.techStackTags.innerHTML = '<span class="tag-empty">Standard HTML / Vanilla JS</span>';
+    }
+
+    // Headings
+    if (data.headings && data.headings.length > 0) {
+      elements.headingsList.innerHTML = data.headings.slice(0, 25).map(h => `
+        <div class="heading-row">
+          <span class="heading-tag">${h.level.toUpperCase()}</span>
+          <span class="heading-text" title="${escapeHtml(h.text)}">${escapeHtml(h.text)}</span>
+        </div>
+      `).join('');
+    } else {
+      elements.headingsList.innerHTML = '<div class="empty-state">No H1-H4 tags detected.</div>';
+    }
+
+    // Render tabs
+    renderImagesTab();
+    renderMediaTab();
+    renderCardsTab();
+    renderCloudTab();
+    renderLinksTab();
+  }
+
+  function renderDesignAssets(assets) {
+    if (!assets) return;
+
+    if (assets.colors && assets.colors.length > 0) {
+      elements.paletteRow.innerHTML = assets.colors.map(hex => `
+        <div class="color-swatch-chip" data-hex="${hex}" title="Click to copy ${hex}">
+          <span class="color-circle" style="background-color: ${hex};"></span>
+          <span>${hex}</span>
+        </div>
+      `).join('');
+
+      elements.paletteRow.querySelectorAll('.color-swatch-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          copyToClipboard(chip.dataset.hex);
+          showToast(`Copied color ${chip.dataset.hex}`);
+        });
+      });
+    } else {
+      elements.paletteRow.innerHTML = '<span class="tag-empty">No dominant colors detected</span>';
+    }
+
+    if (assets.fonts && assets.fonts.length > 0) {
+      elements.fontsRow.innerHTML = assets.fonts.map(f => `
+        <span class="font-badge" title="Font Family">${escapeHtml(f)}</span>
+      `).join('');
+    }
+  }
+
+  /**
+   * =========================================================================
+   * RENDER IMAGES TAB (PRO REDESIGN - NO COLLAPSED BOXES)
+   * =========================================================================
+   */
+  function renderImagesTab() {
+    if (!state.pageData || !state.pageData.images) return;
+
+    let items = state.pageData.images;
+
+    // Apply format filter
+    if (state.imageFormatFilter !== 'all') {
+      items = items.filter(img => img.format === state.imageFormatFilter);
+    }
+
+    // Apply search query
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(img => img.url.toLowerCase().includes(q) || (img.alt && img.alt.toLowerCase().includes(q)));
+    }
+
+    if (items.length === 0) {
+      elements.imagesGallery.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1; width: 100%;">
+          <p>No images matching filter</p>
+        </div>`;
+      return;
+    }
+
+    // Apply Layout Class (grid-layout vs list-layout)
+    elements.imagesGallery.className = `image-gallery ${state.viewMode === 'grid' ? 'grid-layout' : 'list-layout'}`;
+
+    if (state.viewMode === 'grid') {
+      // GRID VIEW
+      elements.imagesGallery.innerHTML = items.map((img, idx) => {
+        const dims = (img.width && img.height) ? `${img.width}×${img.height}` : (img.format || 'IMG');
+        return `
+          <div class="image-card-pro" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}" data-idx="${idx}">
+            <div class="image-thumb-area">
+              <img src="${escapeHtml(img.url)}" 
+                   referrerpolicy="no-referrer" 
+                   loading="lazy" 
+                   alt="${escapeHtml(img.alt || 'Image')}">
+              <span class="image-format-badge">${escapeHtml(img.format || 'IMG')}</span>
+              
+              <!-- Hover Overlay with Actions -->
+              <div class="image-hover-overlay">
+                <button class="overlay-btn btn-zoom" title="Zoom in Lightbox">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6M8 11h6"/>
+                  </svg>
+                </button>
+                <button class="overlay-btn btn-copy-card" title="Copy URL">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                  </svg>
+                </button>
+                <button class="overlay-btn btn-dl-card" title="Download Image">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="image-info-bar">
+              <span class="image-res">${escapeHtml(dims)}</span>
+              <button class="image-quick-copy btn-quick-copy">Copy</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } else {
+      // LIST VIEW
+      elements.imagesGallery.innerHTML = items.map((img, idx) => {
+        const dims = (img.width && img.height) ? `${img.width}×${img.height}px` : (img.format || 'IMG');
+        const filename = getUrlFilename(img.url);
+        return `
+          <div class="image-list-row" data-url="${escapeHtml(img.url)}" data-dims="${escapeHtml(dims)}">
+            <img class="image-mini-thumb" src="${escapeHtml(img.url)}" referrerpolicy="no-referrer" loading="lazy">
+            <div class="image-list-details">
+              <div class="image-list-title" title="${escapeHtml(img.url)}">${escapeHtml(filename)}</div>
+              <div class="image-list-meta">${escapeHtml(dims)} &bull; ${escapeHtml(img.format || 'IMG')}</div>
+            </div>
+            <div class="list-row-badges">
+              <button class="copy-mini-btn btn-zoom">Zoom</button>
+              <button class="copy-mini-btn btn-copy-card">Copy</button>
+              <button class="copy-mini-btn btn-dl-card">Save</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Attach Event Listeners to cards
+    const cards = elements.imagesGallery.querySelectorAll('.image-card-pro, .image-list-row');
+    cards.forEach(card => {
+      const url = card.dataset.url;
+      const dims = card.dataset.dims;
+      const imgEl = card.querySelector('img');
+
+      // Graceful error fallback if image protected or blocked by hotlink
+      if (imgEl) {
+        imgEl.addEventListener('error', () => {
+          const thumbArea = card.querySelector('.image-thumb-area');
+          if (thumbArea) {
+            thumbArea.innerHTML = `
+              <div class="image-fallback-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                </svg>
+                <span>Direct Access Only</span>
+              </div>
+            `;
+          }
+        });
+      }
+
+      // Zoom in Lightbox
+      card.querySelectorAll('.btn-zoom').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openLightbox(url, dims);
+        });
+      });
+
+      // Copy URL
+      card.querySelectorAll('.btn-copy-card, .btn-quick-copy').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          copyToClipboard(url);
+          showToast('Image URL copied!');
+        });
+      });
+
+      // Download
+      card.querySelectorAll('.btn-dl-card').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          downloadUrl(url);
+        });
+      });
+
+      // Clicking card body also opens lightbox in grid view
+      if (state.viewMode === 'grid') {
+        card.addEventListener('click', () => openLightbox(url, dims));
+      }
+    });
+  }
+
+  /**
+   * =========================================================================
+   * RENDER VIDEO & AUDIO TAB (NEW FEATURE)
+   * =========================================================================
+   */
+  function renderMediaTab() {
+    if (!state.pageData || !state.pageData.media) return;
+
+    let items = state.pageData.media;
+
+    if (state.mediaKindFilter !== 'all') {
+      items = items.filter(m => m.kind === state.mediaKindFilter);
+    }
+
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(m => m.url.toLowerCase().includes(q) || (m.title && m.title.toLowerCase().includes(q)));
+    }
+
+    if (items.length === 0) {
+      elements.mediaListContainer.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <p>No video or audio assets found matching filter.</p>
+        </div>`;
+      return;
+    }
+
+    elements.mediaListContainer.innerHTML = items.map(m => {
+      const isVideo = m.kind === 'video';
+      const isAudio = m.kind === 'audio';
+      const badgeClass = isVideo ? 'badge-rose' : 'badge-accent';
+
+      return `
+        <div class="media-card" data-url="${escapeHtml(m.url)}">
+          <div class="media-thumb-box">
+            ${m.poster ? `<img src="${escapeHtml(m.poster)}" referrerpolicy="no-referrer">` : `
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+                ${isVideo ? '<polygon points="5 3 19 12 5 21 5 3"/>' : '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'}
+              </svg>
+            `}
+            <div class="media-play-icon">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <polygon points="6 4 18 12 6 20 6 4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="media-details">
+            <div class="media-title" title="${escapeHtml(m.title || m.url)}">${escapeHtml(m.title || getUrlFilename(m.url))}</div>
+            <div class="media-sub">${escapeHtml(m.source)} &bull; <span class="badge ${badgeClass}">${escapeHtml(m.format)}</span></div>
+            ${isAudio ? `<audio controls src="${escapeHtml(m.url)}" preload="none"></audio>` : ''}
+            <div class="media-actions">
+              <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="btn-xs btn-outline">Open in Tab</a>
+              <button class="btn-xs btn-secondary btn-copy-media" data-url="${escapeHtml(m.url)}">Copy Link</button>
+              <button class="btn-xs btn-primary btn-dl-media" data-url="${escapeHtml(m.url)}">Download</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach listeners
+    elements.mediaListContainer.querySelectorAll('.btn-copy-media').forEach(b => {
+      b.addEventListener('click', () => {
+        copyToClipboard(b.dataset.url);
+        showToast('Media link copied!');
+      });
+    });
+
+    elements.mediaListContainer.querySelectorAll('.btn-dl-media').forEach(b => {
+      b.addEventListener('click', () => downloadUrl(b.dataset.url));
+    });
+  }
+
+  /**
+   * =========================================================================
+   * RENDER STRUCTURED CARDS TAB (NEW FEATURE)
+   * Shows entities in exact position (Title + Image + Description + Link + Price)
+   * =========================================================================
+   */
+  function renderCardsTab() {
+    if (!state.pageData || !state.pageData.cards) return;
+
+    let items = state.pageData.cards;
+
+    // Search query filter
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(c => 
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.description && c.description.toLowerCase().includes(q)) ||
+        (c.link && c.link.toLowerCase().includes(q)) ||
+        (c.badge && c.badge.toLowerCase().includes(q)) ||
+        (c.price && c.price.toLowerCase().includes(q))
+      );
+    }
+
+    // Toggle View Mode (Cards View vs JSON View)
+    if (state.cardViewMode === 'json') {
+      elements.cardsViewContainer.style.display = 'none';
+      elements.cardsJsonContainer.style.display = 'flex';
+      elements.cardsJsonPre.textContent = JSON.stringify(items, null, 2);
+      return;
+    }
+
+    elements.cardsViewContainer.style.display = 'flex';
+    elements.cardsJsonContainer.style.display = 'none';
+
+    if (items.length === 0) {
+      elements.cardsGrid.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="9" y1="21" x2="9" y2="9"/>
+          </svg>
+          <p>No structured card components detected.</p>
+          <p style="font-size: 11px;">Try clicking ⚡ Auto-Scroll to scan dynamic feeds or articles.</p>
+        </div>`;
+      return;
+    }
+
+    elements.cardsGrid.innerHTML = items.map((card, idx) => {
+      return `
+        <div class="entity-card" data-card-id="${escapeHtml(card.id)}" data-idx="${idx}">
+          <div class="entity-thumb-box">
+            ${card.image ? `
+              <img src="${escapeHtml(card.image)}" referrerpolicy="no-referrer" loading="lazy" alt="${escapeHtml(card.alt || card.title)}">
+            ` : `
+              <div class="entity-fallback-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                </svg>
+                <span>No Image</span>
+              </div>
+            `}
+          </div>
+
+          <div class="entity-card-content">
+            <div class="entity-header-row">
+              <div class="entity-title" title="${escapeHtml(card.title)}">${escapeHtml(card.title)}</div>
+              <div class="entity-badge-group">
+                ${card.price ? `<span class="entity-price-badge">${escapeHtml(card.price)}</span>` : ''}
+                ${card.badge ? `<span class="entity-badge">${escapeHtml(card.badge)}</span>` : ''}
+              </div>
+            </div>
+
+            ${card.description ? `
+              <div class="entity-desc" title="${escapeHtml(card.description)}">${escapeHtml(card.description)}</div>
+            ` : '<div class="entity-desc" style="color:var(--text-muted); font-style:italic;">No description text found</div>'}
+
+            <div class="entity-footer-row">
+              ${card.link ? `
+                <a href="${escapeHtml(card.link)}" target="_blank" class="entity-url-link" title="${escapeHtml(card.link)}">
+                  🔗 ${escapeHtml(card.linkText || card.link)}
+                </a>
+              ` : '<span style="font-size:10px; color:var(--text-muted);">Inline Card</span>'}
+
+              <div class="entity-actions">
+                <button class="entity-btn entity-btn-highlight btn-highlight-card" title="Scroll & highlight on webpage">
+                  🎯 Locate
+                </button>
+                <button class="entity-btn btn-copy-card-all" title="Copy Title, Image, Description & Link in one click">
+                  📋 Copy All
+                </button>
+                <button class="entity-btn btn-copy-card-json" title="Copy as JSON object">
+                  { } JSON
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach card event listeners
+    const cardEls = elements.cardsGrid.querySelectorAll('.entity-card');
+    cardEls.forEach(el => {
+      const idx = parseInt(el.dataset.idx, 10);
+      const card = items[idx];
+      if (!card) return;
+
+      // Image error fallback
+      const img = el.querySelector('img');
+      if (img) {
+        img.addEventListener('error', () => {
+          img.parentElement.innerHTML = `
+            <div class="entity-fallback-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              </svg>
+              <span>Image Protected</span>
+            </div>
+          `;
+        });
+      }
+
+      // Highlight on page
+      el.querySelector('.btn-highlight-card')?.addEventListener('click', () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+          if (!tab || !tab.id) return;
+          chrome.tabs.sendMessage(tab.id, { action: 'HIGHLIGHT_CARD', cardId: card.id }, () => {
+            showToast(`Highlighted "${card.title.substring(0, 20)}..." on page!`);
+          });
+        });
+      });
+
+      // Copy All formatted text
+      el.querySelector('.btn-copy-card-all')?.addEventListener('click', () => {
+        const text = formatCardText(card);
+        copyToClipboard(text);
+        showToast('Copied card (Title, Image, Desc & Link)!');
+      });
+
+      // Copy JSON
+      el.querySelector('.btn-copy-card-json')?.addEventListener('click', () => {
+        const json = JSON.stringify(card, null, 2);
+        copyToClipboard(json);
+        showToast('Card copied as JSON!');
+      });
+
+      // Title click opens lightbox if image exists
+      el.querySelector('.entity-title')?.addEventListener('click', () => {
+        if (card.image) openLightbox(card.image, card.title);
+      });
+    });
+  }
+
+  function formatCardText(card) {
+    let out = `Title: ${card.title}\n`;
+    if (card.image) out += `Image: ${card.image}\n`;
+    if (card.price) out += `Price: ${card.price}\n`;
+    if (card.badge) out += `Badge: ${card.badge}\n`;
+    if (card.description) out += `Description: ${card.description}\n`;
+    if (card.link) out += `Link: ${card.link}\n`;
+    return out.trim();
+  }
+
+  /**
+   * =========================================================================
+   * RENDER CLOUD TAB
+   * =========================================================================
+   */
+  function renderCloudTab() {
+    if (!state.pageData || !state.pageData.cloudLinks) return;
+
+    let items = state.pageData.cloudLinks;
+
+    if (state.cloudProviderFilter !== 'all') {
+      items = items.filter(c => c.provider === state.cloudProviderFilter);
+    }
+
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(c => c.url.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.provider.toLowerCase().includes(q));
+    }
+
+    if (items.length === 0) {
+      elements.cloudLinksList.innerHTML = `<div class="empty-state"><p>No cloud endpoints found for filter.</p></div>`;
+      return;
+    }
+
+    elements.cloudLinksList.innerHTML = items.map(c => {
+      const badgeClass = getProviderBadgeClass(c.provider);
+      return `
+        <div class="list-row">
+          <div class="list-row-main">
+            <div class="list-row-title selectable" title="${escapeHtml(c.url)}">${escapeHtml(c.url)}</div>
+            <div class="list-row-subtitle">${escapeHtml(c.category)} &bull; ${escapeHtml(c.context || 'Page Asset')}</div>
+          </div>
+          <div class="list-row-badges">
+            <span class="provider-badge ${badgeClass}">${escapeHtml(c.provider)}</span>
+            <button class="copy-mini-btn btn-copy-item" data-val="${escapeHtml(c.url)}">Copy</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    elements.cloudLinksList.querySelectorAll('.btn-copy-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        copyToClipboard(btn.dataset.val);
+        showToast('Cloud link copied!');
+      });
+    });
+  }
+
+  function getProviderBadgeClass(provider) {
+    if (provider === 'AWS') return 'provider-aws';
+    if (provider === 'Google Cloud') return 'provider-gcp';
+    if (provider === 'Microsoft Azure') return 'provider-azure';
+    if (provider === 'Cloudflare') return 'provider-cloudflare';
+    if (provider === 'GitHub') return 'provider-github';
+    return 'badge-accent';
+  }
+
+  /**
+   * =========================================================================
+   * RENDER LINKS TAB
+   * =========================================================================
+   */
+  function renderLinksTab() {
+    if (!state.pageData) return;
+
+    let items = [];
+
+    if (state.linksTypeFilter === 'contacts') {
+      const contacts = state.pageData.contacts || { emails: [], phones: [], socials: [] };
+      items = [
+        ...contacts.emails.map(e => ({ url: `mailto:${e}`, text: e, category: 'Email Address' })),
+        ...contacts.phones.map(p => ({ url: `tel:${p}`, text: p, category: 'Phone Number' })),
+        ...contacts.socials.map(s => ({ url: s.url, text: s.platform, category: `Social (${s.platform})` }))
+      ];
+    } else {
+      items = state.pageData.links || [];
+      if (state.linksTypeFilter === 'internal') items = items.filter(l => l.isInternal);
+      else if (state.linksTypeFilter === 'external') items = items.filter(l => !l.isInternal);
+      else if (state.linksTypeFilter === 'documents') items = items.filter(l => l.isDocument);
+    }
+
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(l => l.url.toLowerCase().includes(q) || (l.text && l.text.toLowerCase().includes(q)));
+    }
+
+    if (items.length === 0) {
+      elements.allLinksList.innerHTML = `<div class="empty-state"><p>No links found for current filter.</p></div>`;
+      return;
+    }
+
+    elements.allLinksList.innerHTML = items.slice(0, 300).map(l => {
+      const tag = l.isDocument ? (l.docType || 'FILE') : (l.category || (l.isInternal ? 'Internal' : 'External'));
+      return `
+        <div class="list-row">
+          <div class="list-row-main">
+            <div class="list-row-title" title="${escapeHtml(l.text || l.url)}">${escapeHtml(l.text || l.url)}</div>
+            <div class="list-row-subtitle" title="${escapeHtml(l.url)}">${escapeHtml(l.url)}</div>
+          </div>
+          <div class="list-row-badges">
+            <span class="provider-badge provider-aws">${escapeHtml(tag)}</span>
+            <button class="copy-mini-btn btn-copy-link" data-url="${escapeHtml(l.url)}">Copy</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    elements.allLinksList.querySelectorAll('.btn-copy-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        copyToClipboard(btn.dataset.url);
+        showToast('Link copied!');
+      });
+    });
+  }
+
+  /**
+   * =========================================================================
+   * SITEMAP EXTRACTION
+   * =========================================================================
+   */
+  async function fetchSitemap() {
+    let customUrl = elements.inputCustomSitemap.value.trim();
+    if (!customUrl && state.activeUrl && (state.activeUrl.endsWith('.xml') || state.activeUrl.includes('sitemap'))) {
+      customUrl = state.activeUrl;
+      elements.inputCustomSitemap.value = customUrl;
+    }
+    const targetUrl = customUrl || state.activeUrl || `https://${state.domain}/`;
+
+    elements.sitemapStatusText.textContent = 'Discovering and extracting sitemaps...';
+    elements.sitemapStatusRow.querySelector('.status-indicator').classList.add('loading');
+    elements.btnFetchSitemap.disabled = true;
+
+    try {
+      chrome.runtime.sendMessage({
+        action: 'FETCH_SITEMAP',
+        targetUrl: targetUrl,
+        customSitemapUrl: customUrl
+      }, (res) => {
+        elements.sitemapStatusRow.querySelector('.status-indicator').classList.remove('loading');
+        elements.btnFetchSitemap.disabled = false;
+
+        if (chrome.runtime.lastError || !res || !res.success) {
+          const err = (res && res.error) || (chrome.runtime.lastError && chrome.runtime.lastError.message) || 'Failed to fetch sitemap';
+          elements.sitemapStatusText.textContent = `Error: ${err}`;
+          elements.sitemapUrlsList.innerHTML = `
+            <div class="empty-state">
+              <p style="color: var(--accent-rose);">Could not locate XML sitemap automatically.</p>
+              <p style="font-size: 11px;">You can paste an exact sitemap URL above (e.g. https://${state.domain}/sitemap.xml) and try again.</p>
+            </div>`;
+          return;
+        }
+
+        state.sitemapData = res;
+        elements.badgeSitemap.textContent = res.totalUrls;
+        elements.sitemapStatusText.textContent = `Found ${res.totalUrls} URLs across ${res.discoveredSources.length} sitemap(s)!`;
+        elements.sitemapMetaBar.style.display = 'flex';
+        elements.sitemapCount.textContent = `${res.totalUrls.toLocaleString()} URLs Extracted`;
+
+        renderSitemapUrls(res.urls);
+      });
+    } catch (e) {
+      elements.btnFetchSitemap.disabled = false;
+      elements.sitemapStatusText.textContent = `Error: ${e.message}`;
+    }
+  }
+
+  function renderSitemapUrls(urls) {
+    let items = urls || [];
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      items = items.filter(u => u.url.toLowerCase().includes(q));
+    }
+
+    if (items.length === 0) {
+      elements.sitemapUrlsList.innerHTML = `<div class="empty-state"><p>No URLs matched search.</p></div>`;
+      return;
+    }
+
+    elements.sitemapUrlsList.innerHTML = items.slice(0, 200).map(u => `
+      <div class="list-row">
+        <div class="list-row-main">
+          <div class="list-row-title selectable">${escapeHtml(u.url)}</div>
+          <div class="list-row-subtitle">
+            ${u.lastmod ? `Modified: ${escapeHtml(u.lastmod)}` : ''} 
+            ${u.priority ? `&bull; Priority: ${escapeHtml(u.priority)}` : ''}
+          </div>
+        </div>
+        <div class="list-row-badges">
+          <button class="copy-mini-btn btn-copy-sitemap-url" data-url="${escapeHtml(u.url)}">Copy</button>
+        </div>
+      </div>
+    `).join('');
+
+    elements.sitemapUrlsList.querySelectorAll('.btn-copy-sitemap-url').forEach(btn => {
+      btn.addEventListener('click', () => {
+        copyToClipboard(btn.dataset.url);
+        showToast('Sitemap URL copied!');
+      });
+    });
+  }
+
+  /**
+   * =========================================================================
+   * SITE SPIDER CRAWLER
+   * =========================================================================
+   */
+  async function startSiteCrawl() {
+    const maxPages = parseInt(elements.selectMaxPages.value, 10) || 25;
+    elements.btnStartCrawl.style.display = 'none';
+    elements.btnStopCrawl.style.display = 'inline-flex';
+    elements.crawlProgressContainer.style.display = 'flex';
+    elements.crawlProgressFill.style.width = '5%';
+    elements.crawlProgressText.textContent = `Starting spider on ${state.domain}...`;
+
+    chrome.runtime.sendMessage({
+      action: 'START_CRAWL',
+      startUrl: state.activeUrl,
+      maxPages: maxPages
+    }, (res) => {
+      elements.btnStartCrawl.style.display = 'inline-flex';
+      elements.btnStopCrawl.style.display = 'none';
+
+      if (res && res.success) {
+        state.crawlData = res;
+        elements.crawlProgressFill.style.width = '100%';
+        elements.crawlProgressText.textContent = `Crawl complete! Visited ${res.pagesCrawled} pages.`;
+        renderCrawlResults(res);
+      }
+    });
+  }
+
+  function renderCrawlResults(data) {
+    elements.crawlerResultsArea.innerHTML = `
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Crawl Summary</h3>
+          <span class="chip chip-blue">${data.pagesCrawled} Pages Spidered</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div class="metric-num">${data.images.length}</div>
+            <div class="metric-label">Total Images</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num">${data.cloudLinks.length}</div>
+            <div class="metric-label">Cloud Links</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num">${data.links.length}</div>
+            <div class="metric-label">All Links</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num">${data.emails.length}</div>
+            <div class="metric-label">Emails</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px;">
+          <button id="btnExportCrawlJson" class="btn-sm btn-primary">Export Crawled Data (JSON)</button>
+          <button id="btnOpenCrawlInViewer" class="btn-sm btn-secondary">Open Full Tree</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btnExportCrawlJson')?.addEventListener('click', () => {
+      downloadFile(JSON.stringify(data, null, 2), `${state.domain}-crawl-data.json`, 'application/json');
+    });
+
+    document.getElementById('btnOpenCrawlInViewer')?.addEventListener('click', () => {
+      openInViewer(data);
+    });
+  }
+
+  // Real-time synchronization & message listeners
+  let liveUpdateDebounceTimer = null;
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.action === 'CRAWL_PROGRESS') {
+      const pct = Math.round((msg.pagesCrawled / msg.maxPages) * 100);
+      elements.crawlProgressFill.style.width = `${pct}%`;
+      elements.crawlProgressText.textContent = `Crawled ${msg.pagesCrawled}/${msg.maxPages} pages (${msg.totalImages} images, ${msg.totalCloud} cloud links)`;
+    } else if (msg.action === 'DYNAMIC_DOM_UPDATE') {
+      // 1. Immediately update header badge numbers & stats
+      if (msg.stats) {
+        if (elements.badgeImages) elements.badgeImages.textContent = msg.stats.images;
+        if (elements.badgeMedia) elements.badgeMedia.textContent = msg.stats.media;
+        if (elements.badgeCards) elements.badgeCards.textContent = msg.stats.cards || 0;
+        if (elements.badgeCloud) elements.badgeCloud.textContent = msg.stats.cloud;
+        if (elements.badgeLinks) elements.badgeLinks.textContent = msg.stats.links;
+        if (elements.statImages) elements.statImages.textContent = msg.stats.images;
+        if (elements.statCards) elements.statCards.textContent = msg.stats.cards || 0;
+        if (elements.statMedia) elements.statMedia.textContent = msg.stats.media;
+        if (elements.statCloud) elements.statCloud.textContent = msg.stats.cloud;
+      }
+
+      // 2. Debounced background payload fetch to smoothly merge new items without scroll flicker
+      clearTimeout(liveUpdateDebounceTimer);
+      liveUpdateDebounceTimer = setTimeout(() => {
+        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+          if (!tab || !tab.id) return;
+          chrome.tabs.sendMessage(tab.id, { action: 'EXTRACT_PAGE_DATA' }, (res) => {
+            if (chrome.runtime.lastError || !res || !res.success) return;
+            state.pageData = res.data;
+            
+            // Preserve user scroll position inside active container
+            let container = null;
+            if (state.currentTab === 'tab-images') container = elements.imagesGalleryContainer;
+            else if (state.currentTab === 'tab-cards') container = elements.cardsViewContainer;
+            else if (state.currentTab === 'tab-media') container = elements.mediaListContainer;
+
+            const prevScroll = container ? container.scrollTop : 0;
+            refreshActiveTab();
+            if (container) container.scrollTop = prevScroll;
+          });
+        });
+      }, 400);
+    } else if (msg.action === 'AUTO_SCROLL_COMPLETE') {
+      updateAutoScrollUI(false);
+      showToast('🎉 Auto-Scroll complete! All items captured.');
+    }
+  });
+
+  /**
+   * Auto-Scroll Harvester controls
+   */
+  function checkAutoScrollStatus() {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (!tab || !tab.id) return;
+      chrome.tabs.sendMessage(tab.id, { action: 'GET_AUTO_SCROLL_STATUS' }, (res) => {
+        if (chrome.runtime.lastError) return;
+        if (res && res.isActive) {
+          updateAutoScrollUI(true);
+        }
+      });
+    });
+  }
+
+  function toggleAutoScroll() {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (!tab || !tab.id) return;
+      const nextAction = state.isAutoScrolling ? 'STOP_AUTO_SCROLL' : 'START_AUTO_SCROLL';
+      chrome.tabs.sendMessage(tab.id, { action: nextAction, maxScrolls: 50 }, (res) => {
+        if (chrome.runtime.lastError) {
+          showToast('Cannot auto-scroll on this page');
+          return;
+        }
+        if (res && res.success) {
+          state.isAutoScrolling = res.isScrolling;
+          updateAutoScrollUI(state.isAutoScrolling);
+          showToast(state.isAutoScrolling ? '⚡ Auto-Scroll Harvesting Active!' : '⏹ Auto-Scroll Stopped');
+        }
+      });
+    });
+  }
+
+  function updateAutoScrollUI(active) {
+    state.isAutoScrolling = active;
+    [elements.btnAutoScroll, elements.btnAutoScrollMedia, elements.btnAutoScrollCards].forEach(btn => {
+      if (!btn) return;
+      if (active) {
+        btn.innerHTML = '⏹ Stop Scroll';
+        btn.classList.add('btn-scrolling-active');
+      } else {
+        btn.innerHTML = '⚡ Auto-Scroll';
+        btn.classList.remove('btn-scrolling-active');
+      }
+    });
+  }
+
+  /**
+   * =========================================================================
+   * LIGHTBOX MODAL SETUP
+   * =========================================================================
+   */
+  function setupLightbox() {
+    const close = () => elements.imageLightboxModal.classList.remove('show');
+    elements.lightboxCloseBtn.addEventListener('click', close);
+    elements.lightboxBackdrop.addEventListener('click', close);
+
+    elements.lightboxCopyBtn.addEventListener('click', () => {
+      copyToClipboard(elements.lightboxUrl.textContent);
+      showToast('Image URL copied!');
+    });
+
+    elements.lightboxDownloadBtn.addEventListener('click', () => {
+      downloadUrl(elements.lightboxUrl.textContent);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && elements.imageLightboxModal.classList.contains('show')) {
+        close();
+      }
+    });
+  }
+
+  function openLightbox(url, dims) {
+    elements.lightboxImg.src = url;
+    elements.lightboxDims.textContent = dims || 'Full Resolution';
+    elements.lightboxUrl.textContent = url;
+    elements.imageLightboxModal.classList.add('show');
+  }
+
+  /**
+   * =========================================================================
+   * EVENT LISTENERS SETUP
+   * =========================================================================
+   */
+  function setupEventListeners() {
+    // Refresh
+    elements.btnRefresh.addEventListener('click', () => {
+      loadActiveTabData();
+      showToast('Refreshing extracted data...');
+    });
+
+    // Open Viewer
+    elements.btnOpenViewer.addEventListener('click', () => openInViewer(state.pageData));
+
+    // Search input
+    elements.globalSearchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value.trim();
+      elements.btnClearSearch.classList.toggle('show', state.searchQuery.length > 0);
+      refreshActiveTab();
+    });
+
+    elements.btnClearSearch.addEventListener('click', () => {
+      elements.globalSearchInput.value = '';
+      state.searchQuery = '';
+      elements.btnClearSearch.classList.remove('show');
+      refreshActiveTab();
+    });
+
+    // View switcher (Grid vs List)
+    elements.btnViewGrid.addEventListener('click', () => {
+      elements.btnViewGrid.classList.add('active');
+      elements.btnViewList.classList.remove('active');
+      state.viewMode = 'grid';
+      renderImagesTab();
+    });
+
+    elements.btnViewList.addEventListener('click', () => {
+      elements.btnViewList.classList.add('active');
+      elements.btnViewGrid.classList.remove('active');
+      state.viewMode = 'list';
+      renderImagesTab();
+    });
+
+    // Image format filter pills
+    elements.imageFormatFilters.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        elements.imageFormatFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.imageFormatFilter = pill.dataset.format;
+        renderImagesTab();
+      });
+    });
+
+    // Media kind filter pills
+    elements.mediaKindFilters.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        elements.mediaKindFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.mediaKindFilter = pill.dataset.kind;
+        renderMediaTab();
+      });
+    });
+
+    // Cloud provider filter pills
+    elements.cloudProviderFilters.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        elements.cloudProviderFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.cloudProviderFilter = pill.dataset.provider;
+        renderCloudTab();
+      });
+    });
+
+    // Links type filter pills
+    elements.linksTypeFilters.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        elements.linksTypeFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.linksTypeFilter = pill.dataset.type;
+        renderLinksTab();
+      });
+    });
+
+    // Sitemap fetch
+    elements.btnFetchSitemap.addEventListener('click', fetchSitemap);
+    elements.inputCustomSitemap?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        fetchSitemap();
+      }
+    });
+
+    elements.btnExportSitemapTxt.addEventListener('click', () => {
+      if (!state.sitemapData || !state.sitemapData.urls) return;
+      const text = state.sitemapData.urls.map(u => u.url).join('\n');
+      downloadFile(text, `${state.domain}-sitemap-urls.txt`, 'text/plain');
+    });
+
+    elements.btnExportSitemapCsv.addEventListener('click', () => {
+      if (!state.sitemapData || !state.sitemapData.urls) return;
+      let csv = 'URL,Last Modified,Change Frequency,Priority\n';
+      state.sitemapData.urls.forEach(u => {
+        csv += `"${u.url}","${u.lastmod || ''}","${u.changefreq || ''}","${u.priority || ''}"\n`;
+      });
+      downloadFile(csv, `${state.domain}-sitemap.csv`, 'text/csv');
+    });
+
+    // Crawler
+    elements.btnStartCrawl.addEventListener('click', startSiteCrawl);
+    elements.btnStopCrawl.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'STOP_CRAWL' }, () => {
+        elements.btnStartCrawl.style.display = 'inline-flex';
+        elements.btnStopCrawl.style.display = 'none';
+        showToast('Crawling stopped.');
+      });
+    });
+
+    // Export dropdown
+    elements.btnExport.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.exportMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => elements.exportMenu.classList.remove('show'));
+
+    document.getElementById('exportJson').addEventListener('click', () => exportActiveTab('json'));
+    document.getElementById('exportCsv').addEventListener('click', () => exportActiveTab('csv'));
+    document.getElementById('exportTxt').addEventListener('click', () => exportActiveTab('txt'));
+    document.getElementById('exportAllJson').addEventListener('click', () => {
+      if (!state.pageData) return;
+      downloadFile(JSON.stringify(state.pageData, null, 2), `${state.domain}-omniextract-full.json`, 'application/json');
+    });
+
+    // Copy All Visible Button
+    elements.btnCopyAll.addEventListener('click', copyAllVisible);
+
+    // Auto-Scroll Harvesting
+    elements.btnAutoScroll?.addEventListener('click', toggleAutoScroll);
+    elements.btnAutoScrollMedia?.addEventListener('click', toggleAutoScroll);
+    elements.btnAutoScrollCards?.addEventListener('click', toggleAutoScroll);
+
+    // Interactive Element & Card Picker from Page
+    elements.btnPickContainer?.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        if (!tab || !tab.id) return;
+        chrome.tabs.sendMessage(tab.id, { action: 'START_PICKER' }, (res) => {
+          if (chrome.runtime.lastError || !res || !res.success) {
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ['scripts/content.js']
+            }, () => {
+              chrome.tabs.sendMessage(tab.id, { action: 'START_PICKER' });
+              window.close();
+            });
+          } else {
+            window.close();
+          }
+        });
+      });
+    });
+
+    // Cards View Filters (Cards vs JSON)
+    elements.cardViewFilters?.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        elements.cardViewFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.cardViewMode = pill.dataset.cardview || 'cards';
+        renderCardsTab();
+      });
+    });
+
+    // Copy All Cards Buttons
+    elements.btnCopyAllCardsJson?.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.cards) return;
+      const json = JSON.stringify(state.pageData.cards, null, 2);
+      copyToClipboard(json);
+      showToast(`Copied ${state.pageData.cards.length} cards as JSON array!`);
+    });
+
+    elements.btnCopyRawCardsJson?.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.cards) return;
+      const json = JSON.stringify(state.pageData.cards, null, 2);
+      copyToClipboard(json);
+      showToast(`Copied ${state.pageData.cards.length} cards as JSON array!`);
+    });
+
+    elements.btnCopyAllCardsText?.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.cards || state.pageData.cards.length === 0) return;
+      const text = state.pageData.cards.map(formatCardText).join('\n\n----------------------------------------\n\n');
+      copyToClipboard(text);
+      showToast(`Copied ${state.pageData.cards.length} cards formatted as text!`);
+    });
+
+    // Batch download images
+    elements.btnDownloadSelectedImages.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.images) return;
+      const imgs = state.pageData.images.slice(0, 40);
+      imgs.forEach((img, idx) => {
+        setTimeout(() => downloadUrl(img.url), idx * 250);
+      });
+      showToast(`Downloading ${imgs.length} images...`);
+    });
+
+    // Batch download media
+    elements.btnDownloadAllMedia.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.media) return;
+      const meds = state.pageData.media.filter(m => m.kind !== 'embed').slice(0, 20);
+      meds.forEach((m, idx) => {
+        setTimeout(() => downloadUrl(m.url), idx * 300);
+      });
+      showToast(`Downloading ${meds.length} media files...`);
+    });
+  }
+
+  function setupTabNavigation() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        state.currentTab = btn.dataset.tab;
+        const targetPane = document.getElementById(state.currentTab);
+        if (targetPane) targetPane.classList.add('active');
+
+        // Show/hide view toggle for Images
+        elements.viewToggleWrapper.style.display = (state.currentTab === 'tab-images') ? 'flex' : 'none';
+
+        refreshActiveTab();
+      });
+    });
+  }
+
+  function refreshActiveTab() {
+    if (state.currentTab === 'tab-images') renderImagesTab();
+    else if (state.currentTab === 'tab-media') renderMediaTab();
+    else if (state.currentTab === 'tab-cards') renderCardsTab();
+    else if (state.currentTab === 'tab-cloud') renderCloudTab();
+    else if (state.currentTab === 'tab-links') renderLinksTab();
+    else if (state.currentTab === 'tab-sitemap' && state.sitemapData) renderSitemapUrls(state.sitemapData.urls);
+  }
+
+  function exportActiveTab(format) {
+    if (!state.pageData) return;
+    let dataToExport = [];
+    let filename = `${state.domain}-${state.currentTab}`;
+
+    if (state.currentTab === 'tab-images') dataToExport = state.pageData.images;
+    else if (state.currentTab === 'tab-media') dataToExport = state.pageData.media;
+    else if (state.currentTab === 'tab-cards') dataToExport = state.pageData.cards;
+    else if (state.currentTab === 'tab-cloud') dataToExport = state.pageData.cloudLinks;
+    else if (state.currentTab === 'tab-links') dataToExport = state.pageData.links;
+    else if (state.currentTab === 'tab-sitemap' && state.sitemapData) dataToExport = state.sitemapData.urls;
+    else dataToExport = state.pageData;
+
+    if (format === 'json') {
+      downloadFile(JSON.stringify(dataToExport, null, 2), `${filename}.json`, 'application/json');
+    } else if (format === 'csv') {
+      let csv = '';
+      if (Array.isArray(dataToExport) && dataToExport.length > 0) {
+        const headers = Object.keys(dataToExport[0]).filter(k => typeof dataToExport[0][k] !== 'object');
+        csv += headers.join(',') + '\n';
+        dataToExport.forEach(item => {
+          csv += headers.map(h => `"${(item[h] || '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+        });
+      }
+      downloadFile(csv, `${filename}.csv`, 'text/csv');
+    } else if (format === 'txt') {
+      let txt = '';
+      if (Array.isArray(dataToExport)) {
+        if (state.currentTab === 'tab-cards') {
+          txt = dataToExport.map(formatCardText).join('\n\n-------------------------\n\n');
+        } else {
+          txt = dataToExport.map(item => item.url || item.link || '').filter(Boolean).join('\n');
+        }
+      }
+      downloadFile(txt, `${filename}.txt`, 'text/plain');
+    }
+  }
+
+  function copyAllVisible() {
+    let urls = [];
+    if (state.currentTab === 'tab-images') {
+      urls = Array.from(elements.imagesGallery.querySelectorAll('[data-url]')).map(c => c.dataset.url);
+    } else if (state.currentTab === 'tab-media') {
+      urls = Array.from(elements.mediaListContainer.querySelectorAll('.media-card')).map(c => c.dataset.url);
+    } else if (state.currentTab === 'tab-cards') {
+      if (state.pageData && state.pageData.cards && state.pageData.cards.length > 0) {
+        const text = state.pageData.cards.map(formatCardText).join('\n\n----------------------------------------\n\n');
+        copyToClipboard(text);
+        showToast(`Copied ${state.pageData.cards.length} cards with full details!`);
+        return;
+      }
+    } else if (state.currentTab === 'tab-cloud') {
+      urls = Array.from(elements.cloudLinksList.querySelectorAll('.btn-copy-item')).map(b => b.dataset.val);
+    } else if (state.currentTab === 'tab-links') {
+      urls = Array.from(elements.allLinksList.querySelectorAll('.btn-copy-link')).map(b => b.dataset.url);
+    } else if (state.currentTab === 'tab-sitemap') {
+      urls = Array.from(elements.sitemapUrlsList.querySelectorAll('.btn-copy-sitemap-url')).map(b => b.dataset.url);
+    } else {
+      urls = [state.activeUrl];
+    }
+
+    if (urls.length > 0) {
+      copyToClipboard(Array.from(new Set(urls)).join('\n'));
+      showToast(`Copied ${urls.length} URLs!`);
+    } else {
+      showToast('No items to copy');
+    }
+  }
+
+  function copyToClipboard(text) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+  }
+
+  function downloadUrl(url) {
+    if (!url) return;
+    chrome.runtime.sendMessage({ action: 'DOWNLOAD_FILE', url: url }, (res) => {
+      if (res && res.success) showToast('Download started');
+    });
+  }
+
+  function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    chrome.downloads.download({ url: url, filename: filename, saveAs: true }, () => {
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${filename}`);
+    });
+  }
+
+  function openInViewer(data) {
+    chrome.runtime.sendMessage({ action: 'OPEN_VIEWER', data: data || state.pageData });
+  }
+
+  function showToast(msg) {
+    elements.toast.textContent = msg;
+    elements.toast.classList.add('show');
+    setTimeout(() => elements.toast.classList.remove('show'), 2200);
+  }
+
+  function getUrlFilename(url) {
+    try {
+      const pathname = new URL(url).pathname;
+      const fn = pathname.substring(pathname.lastIndexOf('/') + 1);
+      return fn ? decodeURIComponent(fn) : url;
+    } catch (e) {
+      return url;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+});
