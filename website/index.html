@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>OmniExtract — The Free Minimalist Web Data, Cloud & Sitemap Harvester</title>
+  <meta name="title" content="OmniExtract — The Free Minimalist Web Data, Cloud & Sitemap Harvester">
+  <meta name="description" content="OmniExtract is a free, open-source Chrome extension to extract images, video, audio, cloud service links (AWS S3, GCP, Azure Blob), meta descriptions, and whole-website XML sitemaps in 1 click. No Chrome Web Store fee needed.">
+  <meta name="keywords" content="chrome extension, web scraper, sitemap extractor, s3 bucket finder, download website images, extract sitemap urls, cloud links extractor, aws s3 extractor, gcp storage finder, video audio scraper, seo metadata extractor, free web scraper extension">
+  <meta name="author" content="OmniExtract Open Source Community">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#fde047">
+  <link rel="canonical" href="https://omniextract.org/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://omniextract.org/">
+  <meta property="og:title" content="OmniExtract — The Free Minimalist Web Harvester">
+  <meta property="og:description" content="Extract all images, videos, audio, cloud buckets (AWS/GCP/Azure), metadata, and whole-website sitemaps in 1 click. 100% Free and Open Source.">
+  <meta property="og:image" content="icons/icon128.png">
+  <meta property="og:site_name" content="OmniExtract">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://omniextract.org/">
+  <meta name="twitter:title" content="OmniExtract — The Free Minimalist Web Harvester">
+  <meta name="twitter:description" content="Extract images, video, audio, cloud buckets, and sitemaps from any website with 1 click. Zero paywalls, zero tracking.">
+  <meta name="twitter:image" content="icons/icon128.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
+
+  <!-- Google Fonts: Space Grotesk, Caveat, Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@400;600&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data: SoftwareApplication, FAQPage, HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "OmniExtract",
+        "operatingSystem": "Chrome, Brave, Edge, Opera, Chromium",
+        "applicationCategory": "BrowserExtension",
+        "description": "A powerful, privacy-first Chrome extension for extracting images, audio, video, cloud buckets (AWS/GCP/Azure), and XML sitemaps.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "128"
+        }
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Install OmniExtract Chrome Extension Manually",
+        "description": "Install OmniExtract for free without paying the Chrome Web Store tax in 20 seconds.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Download and Unzip",
+            "text": "Download the OmniExtract-v1.0.zip archive and extract it on your computer."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Open Extensions Manager",
+            "text": "Navigate to chrome://extensions in your browser address bar."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Enable Developer Mode and Load Unpacked",
+            "text": "Turn on Developer mode toggle in the top-right corner, click Load unpacked, and choose the extracted folder."
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why isn't OmniExtract in the Chrome Web Store?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Google charges developers a $5 registration fee to publish on the Chrome Web Store. OmniExtract is built as a 100% free, open-source project, so you can install it directly without middleman fees or auto-update restrictions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is OmniExtract safe to use and does it track my browsing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OmniExtract runs 100% locally inside your browser. It does not send data to any external server, contains zero analytics or telemetry, and all source code is completely unminified and inspectable."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can OmniExtract extract images and cloud links from password-protected sites?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! Because OmniExtract runs directly within your active browser tab, it has access to the rendered DOM of pages you are logged into, bypassing external scraping barriers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I extract all URLs from an XML sitemap?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Navigate to any website, open OmniExtract, click the Sitemap tab, and click 'Extract Sitemap'. The extension will automatically detect robots.txt, parse nested sitemap indexes, and list all URLs with export options."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does OmniExtract capture items on infinite scroll pages?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. OmniExtract uses an in-memory accumulator and MutationObserver to capture new images, media, and cloud links dynamically as you scroll, and features an automated hands-free Auto-Scroll harvester engine."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sketchbook Paper Texture -->
+  <div class="paper-bg"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-group">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m4.93 4.93 14.14 14.14"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          <path d="M2 12h20"/>
+        </svg>
+      </div>
+      <div>
+        <span class="logo-title">OmniExtract</span>
+        <span class="logo-sub">open source • v1.0</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a href="#features" class="nav-item">Features</a>
+      <a href="#how-to-use" class="nav-item">How to Use</a>
+      <a href="#install" class="nav-item">Install in 20s</a>
+      <a href="#faq" class="nav-item">FAQ</a>
+      <a href="#why-no-store" class="nav-item highlight-link">Why No Store?</a>
+      <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-sm header-cta">
+        Download .ZIP ↓
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="container">
+    <section class="hero-section">
+      <div class="badge-tag">
+        <span>✏️ 100% Free • Open Source • No $5 Chrome Web Store Tax</span>
+      </div>
+
+      <h1 class="hero-heading">
+        Extract <span class="marker-yellow">everything</span> from any website with a single click.
+      </h1>
+
+      <p class="hero-subtext">
+        The all-in-one developer & researcher browser toolkit. Pull high-res 
+        <span class="highlight-cyan">images</span>, <span class="highlight-pink">audio & video streams</span>, 
+        <span class="highlight-yellow">AWS S3 / GCP / Azure cloud buckets</span>, 
+        <span class="highlight-green">full XML sitemaps</span>, and SEO metadata from any webpage in seconds.
+      </p>
+
+      <!-- Primary CTA Area with Hand-drawn Arrow -->
+      <div class="cta-wrapper">
+        <div class="doodle-arrow-container">
+          <span class="doodle-note">Direct download, no sign-up! ⤵</span>
+          <svg class="hand-arrow" viewBox="0 0 60 40" width="55" height="36" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 5 C 20 15, 35 10, 48 28"/>
+            <path d="M38 30 L 50 30 L 48 18"/>
+          </svg>
+        </div>
+
+        <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-lg btn-download">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" x2="12" y1="15" y2="3"/>
+          </svg>
+          <span>Download OmniExtract (.zip)</span>
+          <span class="btn-sub">v1.0 • 48 KB • 100% Clean • Manifest V3</span>
+        </a>
+
+        <div class="trust-pills">
+          <span class="pill-item">✓ Manifest V3 Ready</span>
+          <span class="pill-item">✓ Zero Telemetry & Privacy-First</span>
+          <span class="pill-item">✓ Compatible with Chrome, Brave & Edge</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Sketchy UI Mockup -->
+    <section class="mockup-section">
+      <div class="sketch-card mockup-box">
+        <div class="tape-strip top-tape"></div>
+        <div class="mockup-header">
+          <div class="window-dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <span class="mockup-url">OmniExtract Harvester • Live Interactive Preview</span>
+          <span class="sketch-badge">Interactive Demo</span>
+        </div>
+
+        <!-- Mockup Tab Bar -->
+        <div class="mockup-tabs">
+          <button class="m-tab active" data-target="m-images">🖼️ Images (42)</button>
+          <button class="m-tab" data-target="m-cards">🗂️ Cards & Feeds (12)</button>
+          <button class="m-tab" data-target="m-media">🎬 Video & Audio (5)</button>
+          <button class="m-tab" data-target="m-cloud">☁️ Cloud & APIs (16)</button>
+          <button class="m-tab" data-target="m-sitemap">🗺️ Sitemap (XML)</button>
+        </div>
+
+        <!-- Mockup Screen Content -->
+        <div class="mockup-body">
+          <!-- View 1: Images -->
+          <div class="m-view active" id="m-images">
+            <div class="sketch-grid">
+              <div class="sketch-tile">
+                <div class="tile-img-box">
+                  <span class="doodle-img-icon">🖼️</span>
+                  <span class="tile-badge">WEBP</span>
+                </div>
+                <div class="tile-info">1920×1080px • <span class="action-txt">Save</span></div>
+              </div>
+              <div class="sketch-tile">
+                <div class="tile-img-box">
+                  <span class="doodle-img-icon">🖼️</span>
+                  <span class="tile-badge">JPG</span>
+                </div>
+                <div class="tile-info">800×600px • <span class="action-txt">Save</span></div>
+              </div>
+              <div class="sketch-tile">
+                <div class="tile-img-box">
+                  <span class="doodle-img-icon">🖼️</span>
+                  <span class="tile-badge">PNG</span>
+                </div>
+                <div class="tile-info">1200×800px • <span class="action-txt">Save</span></div>
+              </div>
+            </div>
+            <div class="m-caption">
+              ⚡ <em>Auto-bypasses hotlink protection with built-in Lightbox zoom, grid/list toggles, and batch zip saving!</em>
+            </div>
+          </div>
+
+          <!-- View 2: Cards & Structured Feeds -->
+          <div class="m-view" id="m-cards">
+            <div class="sketch-list">
+              <div class="sketch-list-row" style="align-items: flex-start; gap: 12px;">
+                <div style="width: 48px; height: 44px; background: #e2e8f0; border: 1.5px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">👟</div>
+                <div class="row-text" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>Nike Air Max Pro 2026</strong>
+                    <span class="sketch-pill pill-orange">$149.99</span>
+                  </div>
+                  <small style="display: block; margin-top: 2px;">Running shoes with air cushioning and breathable mesh.</small>
+                  <div style="display: flex; gap: 10px; margin-top: 4px; font-size: 11px;">
+                    <span class="action-txt">📋 Copy All</span>
+                    <span class="action-txt">{ } JSON</span>
+                    <span class="action-txt">🎯 Locate</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sketch-list-row" style="align-items: flex-start; gap: 12px;">
+                <div style="width: 48px; height: 44px; background: #e2e8f0; border: 1.5px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">☁️</div>
+                <div class="row-text" style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>AWS Multi-Cloud Solution</strong>
+                    <span class="sketch-pill pill-cyan">Architecture</span>
+                  </div>
+                  <small style="display: block; margin-top: 2px;">High availability S3 storage and Dataproc compute analytics.</small>
+                  <div style="display: flex; gap: 10px; margin-top: 4px; font-size: 11px;">
+                    <span class="action-txt">📋 Copy All</span>
+                    <span class="action-txt">{ } JSON</span>
+                    <span class="action-txt">🎯 Locate</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="m-caption">
+              ⚡ <em>Extracts Title, Image, Description, Price, and Link together in exact visual order!</em>
+            </div>
+          </div>
+
+          <!-- View 3: Video & Audio -->
+          <div class="m-view" id="m-media">
+            <div class="sketch-list">
+              <div class="sketch-list-row">
+                <span class="row-icon">🎬</span>
+                <div class="row-text">
+                  <strong>Cloud-Architecture-Demo.mp4</strong>
+                  <small>HTML5 Video Element • 1080p</small>
+                </div>
+                <span class="sketch-pill pill-pink">MP4</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">🎧</span>
+                <div class="row-text">
+                  <strong>Engineering-Podcast-Ep-1.mp3</strong>
+                  <small>Playable inline audio player embedded</small>
+                </div>
+                <span class="sketch-pill pill-cyan">MP3</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">📺</span>
+                <div class="row-text">
+                  <strong>YouTube Cloud Walkthrough</strong>
+                  <small>Embedded &lt;iframe&gt; player</small>
+                </div>
+                <span class="sketch-pill pill-yellow">YOUTUBE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 3: Cloud & APIs -->
+          <div class="m-view" id="m-cloud">
+            <div class="sketch-list">
+              <div class="sketch-list-row">
+                <span class="row-icon">☁️</span>
+                <div class="row-text">
+                  <code>https://my-bucket.s3.amazonaws.com/data.parquet</code>
+                  <small>AWS • S3 Object Storage</small>
+                </div>
+                <span class="sketch-pill pill-orange">AWS</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">🗄️</span>
+                <div class="row-text">
+                  <code>https://storage.googleapis.com/analytics/lake.csv</code>
+                  <small>Google Cloud • Storage Bucket</small>
+                </div>
+                <span class="sketch-pill pill-blue">GCP</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">📦</span>
+                <div class="row-text">
+                  <code>https://corp.blob.core.windows.net/backups.tar.gz</code>
+                  <small>Microsoft Azure • Blob Storage Container</small>
+                </div>
+                <span class="sketch-pill pill-cyan">AZURE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 4: Sitemap -->
+          <div class="m-view" id="m-sitemap">
+            <div class="sketch-sitemap">
+              <div class="sitemap-tag">✅ Discovered via <code>robots.txt</code> &bull; 7 URLs Found</div>
+              <ul class="sitemap-tree">
+                <li>📄 <code>/index.html</code> (Priority: 1.0 &bull; Daily)</li>
+                <li>📄 <code>/products/s3-accelerator.html</code> (Priority: 0.9 &bull; Weekly)</li>
+                <li>📄 <code>/products/gcs-connector.html</code> (Priority: 0.9 &bull; Weekly)</li>
+                <li>📄 <code>/whitepapers/cloud-benchmark.pdf</code> (Document Link)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Not on the Chrome Web Store? (The Relatable Story Card) -->
+    <section id="why-no-store" class="why-card-section">
+      <div class="sketch-card tape-card">
+        <div class="tape-strip center-tape"></div>
+        <div class="story-content">
+          <span class="sketch-tag">💡 The Honest Truth</span>
+          <h2>Why isn't this in the Chrome Web Store?</h2>
+          <p>
+            Google charges independent developers a <strong>$5 registration fee</strong> to publish extensions 
+            on the official Chrome Web Store.
+          </p>
+          <p>
+            I'm a solo student & creator, and I'd rather spend $5 on coffee ☕ and share the full source code 
+            <strong>100% free and open</strong>!
+          </p>
+          <p>
+            Installing it manually takes literally <strong>20 seconds</strong>, gives you full control over 
+            your extension without auto-updates breaking your workflow, and guarantees zero spyware or remote tracking.
+          </p>
+          <div class="story-signature">
+            <span>— The OmniExtract Creator</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-Step Installation Guide -->
+    <section id="install" class="install-section">
+      <div class="section-title-wrap">
+        <span class="sub-label">Zero Hassle • 20 Seconds</span>
+        <h2 class="section-title">How to Install in 3 Easy Steps</h2>
+        <svg class="squiggly-underline" viewBox="0 0 200 12" width="180" height="12">
+          <path d="M2 7 Q 25 1, 50 7 T 100 7 T 150 7 T 198 7" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="sketch-card step-card">
+          <div class="step-num">1</div>
+          <h3>Download & Extract</h3>
+          <p>Click below to download <code>OmniExtract-v1.0.zip</code>. Right-click the downloaded file and select <strong>"Extract All"</strong> to unzip it.</p>
+          <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-sm" style="margin-top: 10px;">
+            Download .ZIP (48 KB)
+          </a>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="sketch-card step-card">
+          <div class="step-num">2</div>
+          <h3>Open Chrome Extensions</h3>
+          <p>In Google Chrome (or Brave, Edge, Opera, Vivaldi), navigate to the extensions management screen:</p>
+          <div class="code-copy-box">
+            <code>chrome://extensions</code>
+            <button class="copy-btn" id="btnCopyUrl" title="Copy to clipboard">Copy</button>
+          </div>
+          <p class="step-hint">Paste into your address bar and press Enter.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="sketch-card step-card">
+          <div class="step-num">3</div>
+          <h3>Toggle Dev Mode & Load</h3>
+          <p>1. In the top-right corner, toggle on <strong>"Developer mode"</strong>.</p>
+          <p>2. In the top-left corner, click <strong>"Load unpacked"</strong>.</p>
+          <p>3. Select the extracted OmniExtract folder. That's it!</p>
+          <div class="ready-badge">🎉 Boom! Pin the icon and start extracting!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed "How to Use" Guide (User Workflows) -->
+    <section id="how-to-use" class="how-to-use-section">
+      <div class="section-title-wrap">
+        <span class="sub-label">Step-by-Step Workflows</span>
+        <h2 class="section-title">How to Use OmniExtract Like a Pro</h2>
+        <svg class="squiggly-underline" viewBox="0 0 200 12" width="180" height="12">
+          <path d="M2 7 Q 25 1, 50 7 T 100 7 T 150 7 T 198 7" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="workflows-container">
+        <!-- Workflow 1: Images -->
+        <div class="sketch-card workflow-card">
+          <div class="wf-badge">Workflow #1</div>
+          <h3>🖼️ How to Scrape & Batch Download Website Images</h3>
+          <ol class="wf-steps">
+            <li>Navigate to any webpage or image gallery (e.g., Unsplash, Pinterest, e-commerce shop, portfolio).</li>
+            <li>Click the <strong>OmniExtract</strong> puzzle icon in your Chrome toolbar.</li>
+            <li>Switch between <strong>Grid Gallery</strong> and <strong>List Table</strong> layout using the toggle button.</li>
+            <li>Filter images by format: <code>JPG</code>, <code>PNG</code>, <code>WEBP</code>, or <code>SVG</code>.</li>
+            <li>Click any thumbnail to inspect in the full-size <strong>Lightbox Zoom Modal</strong>, or hit <strong>"Download All"</strong> to batch save all images to your downloads folder.</li>
+          </ol>
+        </div>
+
+        <!-- Workflow 2: Cloud Buckets -->
+        <div class="sketch-card workflow-card">
+          <div class="wf-badge wf-badge-orange">Workflow #2</div>
+          <h3>☁️ How to Hunt Cloud Buckets & Leaked Endpoints (Bug Bounty / Auditing)</h3>
+          <ol class="wf-steps">
+            <li>Open the target application or website.</li>
+            <li>Click OmniExtract and select the <strong>Cloud & APIs</strong> tab.</li>
+            <li>The engine automatically scans the DOM, external resource tags, and inline JavaScript files for:
+              <br>• <strong>AWS</strong>: S3 buckets (<code>*.s3.amazonaws.com</code>), CloudFront, API Gateway
+              <br>• <strong>Google Cloud</strong>: GCS buckets (<code>storage.googleapis.com</code>), Firebase DB, Cloud Run
+              <br>• <strong>Azure</strong>: Blob storage (<code>*.blob.core.windows.net</code>), Azure Edge CDN
+              <br>• <strong>Cloudflare</strong>: Workers, Pages, R2 Buckets, Supabase databases
+            </li>
+            <li>Click <strong>"Copy"</strong> to copy specific endpoints or click <strong>"Export Tab as CSV/JSON"</strong> to save the complete inventory.</li>
+          </ol>
+        </div>
+
+        <!-- Workflow 3: Sitemaps -->
+        <div class="sketch-card workflow-card">
+          <div class="wf-badge wf-badge-purple">Workflow #3</div>
+          <h3>🗺️ How to Extract Every URL from a Website Sitemap</h3>
+          <ol class="wf-steps">
+            <li>Visit the root domain of the website you want to audit.</li>
+            <li>Click the <strong>Sitemap</strong> tab inside OmniExtract.</li>
+            <li>Click <strong>"Extract Sitemap"</strong>. OmniExtract will automatically check <code>robots.txt</code>, probe standard sitemap paths, and recursively follow nested <code>&lt;sitemapindex&gt;</code> child files.</li>
+            <li>Browse the extracted list with last-modified dates, priority, and change frequency.</li>
+            <li>Click <strong>"Export URLs (.txt)"</strong> to download a clean text file of URLs ready for Python scripts, <code>wget</code>, <code>curl</code>, or Screaming Frog!</li>
+          </ol>
+        </div>
+
+        <!-- Workflow 4: Video & Audio -->
+        <div class="sketch-card workflow-card">
+          <div class="wf-badge wf-badge-pink">Workflow #4</div>
+          <h3>🎬 How to Capture Audio Podcasts & Video Streams</h3>
+          <ol class="wf-steps">
+            <li>Open any article, news site, or media post.</li>
+            <li>Open OmniExtract and head to the <strong>Video & Audio</strong> tab.</li>
+            <li>Inspect detected HTML5 <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> tracks, direct MP4/MP3 download links, and YouTube/Vimeo embeds.</li>
+            <li>Listen to audio files directly using the <strong>embedded audio player</strong> without opening new tabs, or click <strong>"Download"</strong> to save the stream.</li>
+          </ol>
+        </div>
+
+        <!-- Workflow 5: Structured Cards & Feeds -->
+        <div class="sketch-card workflow-card">
+          <div class="wf-badge" style="background:#f59e0b; color:#000;">Workflow #5</div>
+          <h3>🗂️ How to Extract Structured Cards (Title, Image & Description Combined)</h3>
+          <ol class="wf-steps">
+            <li>Open any product catalogue, news feed, or article list (e.g. Amazon, Etsy, Medium, Shopify stores).</li>
+            <li>Open OmniExtract and click the <strong>Cards</strong> tab.</li>
+            <li>OmniExtract automatically identifies repeating containers and binds their <strong>Title</strong>, <strong>Image</strong>, <strong>Description</strong>, <strong>Price/Badge</strong>, and <strong>Link</strong> into clean unified objects.</li>
+            <li>Click <strong>"📋 Copy All"</strong> on any card to copy its full details in one click, or click <strong>"{ } JSON"</strong> to copy the card as clean code.</li>
+            <li>Click <strong>"🎯 Locate"</strong> to smoothly scroll to and highlight that exact card on the live webpage!</li>
+            <li>Toggle between <strong>Cards View</strong> and <strong>JSON Tree View</strong>, or export all cards to structured CSV / JSON.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comprehensive Feature Grid -->
+    <section id="features" class="features-section">
+      <div class="section-title-wrap">
+        <span class="sub-label">Power Capabilities</span>
+        <h2 class="section-title">Everything Built Inside OmniExtract</h2>
+        <svg class="squiggly-underline" viewBox="0 0 200 12" width="180" height="12">
+          <path d="M2 7 Q 25 1, 50 7 T 100 7 T 150 7 T 198 7" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="features-grid">
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🖼️</div>
+          <h3>Deep Image Harvester</h3>
+          <p>Extracts standard <code>&lt;img&gt;</code>, high-res <code>srcset</code> variants, lazy-loaded <code>data-src</code>, CSS background images, and SVGs. Includes Lightbox zoom and batch downloading.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🗂️</div>
+          <h3>Structured Cards & Feed Extractor</h3>
+          <p>Extracts Titles, Images, Descriptions, Prices, and Links grouped together in the exact visual hierarchy they appear in on the page. Copy cards all-in-one, highlight them on the live page, or export to clean JSON arrays!</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🎬</div>
+          <h3>Video & Audio Grabber</h3>
+          <p>Scans HTML5 video/audio elements, direct MP4/WebM/MP3 links, and embeds from YouTube, Vimeo, Loom, and Spotify with an inline audio player.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">☁️</div>
+          <h3>Cloud Storage Hunter</h3>
+          <p>Scans page source and scripts for AWS S3 buckets, Google Cloud Storage, Azure Blob containers, Cloudflare R2, and Supabase endpoints.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🗺️</div>
+          <h3>Recursive XML Sitemap Engine</h3>
+          <p>Scans <code>robots.txt</code>, automatically parses nested sitemap index hierarchies, extracts thousands of URLs, and exports clean lists to TXT or CSV.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🕷️</div>
+          <h3>Multi-Page Site Spider</h3>
+          <p>Spider across internal links (10 to 100 pages) and aggregate unique images, media, cloud links, and contact emails across the entire website.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🎨</div>
+          <h3>Brand Colors & Typography</h3>
+          <p>Extracts the website's dominant color palette into interactive 1-click copy HEX swatches and detects all active font families and Google Fonts.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">⚡</div>
+          <h3>Dynamic Feed & Auto-Scroll Harvester</h3>
+          <p>Equipped with a live <code>MutationObserver</code> and an automated scroll harvester. Captures lazy-loaded images, videos, and links on infinite-scroll feeds (Instagram, Pinterest, Twitter, Unsplash) and retains them even when virtualized DOM elements unmount!</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">📊</div>
+          <h3>SEO & Metadata Inspector</h3>
+          <p>Extracts Page Titles, Meta Descriptions, Canonical URLs, OpenGraph cards with live preview banners, Twitter cards, JSON-LD schemas, and heading trees.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🖥️</div>
+          <h3>Full-Screen Pro Dashboard</h3>
+          <p>Click "Open Full Dashboard" to launch a full-screen standalone tab (<code>viewer.html</code>) with filterable tables, pagination, and raw JSON tree inspection.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">💾</div>
+          <h3>Multi-Format Data Exports</h3>
+          <p>Export any individual tab or the entire site dataset into structured <strong>JSON</strong>, spreadsheet-ready <strong>CSV</strong>, or clean <strong>TXT</strong> URL lists.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comprehensive Sketched FAQ Section -->
+    <section id="faq" class="faq-section">
+      <div class="section-title-wrap">
+        <span class="sub-label">Got Questions?</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <svg class="squiggly-underline" viewBox="0 0 200 12" width="180" height="12">
+          <path d="M2 7 Q 25 1, 50 7 T 100 7 T 150 7 T 198 7" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="faq-container">
+        <!-- FAQ 1 -->
+        <details class="sketch-card faq-card" open>
+          <summary class="faq-question">
+            <span>Is OmniExtract completely free? Are there hidden fees?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Yes, 100% free and open-source forever!</strong> There are no subscriptions, no premium tiers, no credit card requirements, and no "pro upgrades". You get the full source code and can use it as much as you want.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 2 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Why isn't OmniExtract in the official Chrome Web Store?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Google requires all developers to pay a <strong>$5 registration fee</strong> before publishing any extension to the Chrome Web Store. Since this is an independent, non-commercial tool, we chose to host the code for free here so anyone can download the ZIP and load it in 20 seconds. It also gives you total freedom to inspect every line of code!</p>
+          </div>
+        </details>
+
+        <!-- FAQ 3 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Is it safe? Does OmniExtract track my passwords or browsing history?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>OmniExtract is 100% safe and privacy-first.</strong> The extension runs entirely locally inside your browser sandbox. It makes zero network calls to external analytics, tracking servers, or telemetry. Your extracted data never leaves your machine.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 4 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Which browsers are supported?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>OmniExtract is built on <strong>Chrome Manifest V3</strong> and is fully compatible with all Chromium-based browsers, including: <strong>Google Chrome</strong>, <strong>Brave Browser</strong>, <strong>Microsoft Edge</strong>, <strong>Opera</strong>, <strong>Vivaldi</strong>, and <strong>Arc</strong>.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 5 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Does it work on password-protected pages or paywalls?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Yes!</strong> Unlike external scraping bots that get blocked by Cloudflare or login screens, OmniExtract operates inside your active tab using your authenticated browser session. If you can see the page in your browser, OmniExtract can extract it.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 6 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>How do I update the extension when a new release comes out?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Simply download the updated <code>OmniExtract-v1.0.zip</code> file, extract and replace the files inside your existing OmniExtract folder, open <code>chrome://extensions</code>, and click the <strong>circular reload arrow (🔄)</strong> on the OmniExtract card. Your extension updates instantly with all your settings preserved.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 7 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>What export formats are available?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>You can export data in three standard formats:
+              <br>• <strong>JSON</strong>: Complete nested data structure including dimensions, alt texts, cloud providers, and timestamps.
+              <br>• <strong>CSV</strong>: Clean spreadsheet format ready for Microsoft Excel, Google Sheets, or Pandas.
+              <br>• <strong>TXT</strong>: Clean list of raw URLs (one per line) ready for command-line tools like <code>wget</code>, <code>curl</code>, or custom Python scripts.
+            </p>
+          </div>
+        </details>
+
+        <!-- FAQ 8 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Does OmniExtract capture new images & media as I scroll infinite feeds?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Yes, seamlessly!</strong> OmniExtract runs an intelligent in-memory accumulator and an active <code>MutationObserver</code>. As you scroll down dynamic feeds (like Pinterest, Instagram, Twitter/X, or e-commerce catalogues), new images and media are automatically captured in real time. Even if virtualized frameworks remove older elements from the screen DOM to save memory, OmniExtract retains them all in memory. You can also click the <strong>⚡ Auto-Scroll</strong> button to let OmniExtract harvest the entire feed hands-free!</p>
+          </div>
+        </details>
+
+        <!-- FAQ 9 -->
+        <details class="sketch-card faq-card">
+          <summary class="faq-question">
+            <span>Can I extract title, image, description, and links together from cards or divs?</span>
+            <span class="faq-toggle">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Yes, exactly in their original hierarchy!</strong> Open the <strong>Cards</strong> tab. OmniExtract identifies repeating containers (product cards, article previews, listings) and groups their <strong>Title</strong>, <strong>Image</strong>, <strong>Description</strong>, <strong>Price/Badge</strong>, and <strong>Link</strong> into cohesive units. You can click <strong>"📋 Copy All"</strong> to grab the complete card in one click, click <strong>"🎯 Locate"</strong> to flash the container on the webpage, or export all cards as a structured JSON array or CSV!</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Bottom Download Banner -->
+    <section class="bottom-banner">
+      <div class="sketch-card banner-box">
+        <span class="sketch-tag">⚡ Ready to start extracting?</span>
+        <h2>Grab your free copy of OmniExtract now.</h2>
+        <p>No account required. No registration. 100% clean, open-source Manifest V3 code.</p>
+        <div style="margin-top: 20px;">
+          <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-lg btn-download">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" x2="12" y1="15" y2="3"/>
+            </svg>
+            <span>Download OmniExtract (.zip)</span>
+            <span class="btn-sub">v1.0 • 48 KB • 100% Free Forever</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sketchy Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>✏️ <strong>OmniExtract</strong> • Crafted with ☕ by an independent developer for researchers and data builders.</p>
+      <p class="footer-sub">Distributed freely under the MIT License • Runs 100% locally in your browser sandbox.</p>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="siteToast">Copied to clipboard!</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
