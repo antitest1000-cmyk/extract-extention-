@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>OmniExtract Features — 10 Advanced Web Scraping & Data Extraction Engines</title>
+  <meta name="title" content="OmniExtract Features — 10 Advanced Web Scraping & Data Extraction Engines">
+  <meta name="description" content="Explore OmniExtract's 10 built-in extraction engines: custom multi-image selection, table to CSV/Markdown converter, leads dossier, AI clean markdown, crosshair picker, SPA state, and XML sitemaps.">
+  <meta name="keywords" content="web scraping features, download website images, table to csv extension, sitemap extractor, s3 bucket finder, spa state extractor, api key scanner, chrome data harvester">
+  <meta name="author" content="OmniExtract Open Source Community">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#fde047">
+  <link rel="canonical" href="https://omniextract.org/features.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://omniextract.org/features.html">
+  <meta property="og:title" content="OmniExtract Features — 10 Advanced Web Data Extraction Engines">
+  <meta property="og:description" content="Deep dive into OmniExtract's image selector, table converter, leads extractor, AI markdown generator, and XML sitemap engine.">
+  <meta property="og:image" content="icons/icon128.png">
+  <meta property="og:site_name" content="OmniExtract">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://omniextract.org/features.html">
+  <meta name="twitter:title" content="OmniExtract Features — 10 Web Data Engines">
+  <meta name="twitter:description" content="Extract images, tables, cloud links, SPA state, and sitemaps in 1 click with OmniExtract.">
+  <meta name="twitter:image" content="icons/icon128.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@400;600&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://omniextract.org/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Features",
+        "item": "https://omniextract.org/features.html"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="header">
+    <a href="index.html" class="logo-group" style="text-decoration: none; color: inherit;">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </div>
+      <div>
+        <span class="logo-title">OmniExtract</span>
+        <span class="logo-sub">open source • v1.0</span>
+      </div>
+    </a>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-item">Home</a>
+      <a href="features.html" class="nav-item highlight-link">Features</a>
+      <a href="guide.html" class="nav-item">Install Guide</a>
+      <a href="docs.html" class="nav-item">Documentation</a>
+      <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-sm header-cta">
+        Download .ZIP ↓
+      </a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href="index.html">Home</a>
+      <span class="separator">/</span>
+      <span class="current">Features</span>
+    </nav>
+
+    <!-- Subpage Hero -->
+    <section class="subpage-hero">
+      <div class="badge-tag">
+        <span>⚡ Comprehensive Toolkit</span>
+      </div>
+      <h1>10 Powerful Extraction Engines in One Free Extension</h1>
+      <p class="lead">
+        OmniExtract replaces fragmented browser tools, scrapers, and python scripts with a unified command deck. Everything executes 100% locally in your browser sandbox without sending a single byte to external servers.
+      </p>
+    </section>
+
+    <!-- Deep-Dive Features Grid -->
+    <section class="feature-deep-grid">
+
+      <!-- 1. Custom Image Selection & Download -->
+      <article class="feature-deep-card">
+        <h3><span>🖼️</span> 1. Deep Image Harvester + Custom Multi-Selection</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-pink">Interactive Selection</span>
+          <span class="sketch-pill pill-cyan">Staggered Downloads</span>
+          <span class="sketch-pill pill-yellow">High-Res & Dimension Filters</span>
+        </div>
+        <p>Extract every visual asset embedded in any webpage, including <code>&lt;img&gt;</code> tags, <code>srcset</code> high-density variations, lazy-loaded <code>data-src</code> attributes, <code>&lt;picture&gt;</code> elements, and CSS <code>background-image</code> URLs.</p>
+        <ul>
+          <li><strong>Interactive Checkboxes:</strong> Select images manually with individual checkboxes or <code>Ctrl/Shift + Click</code> to download only what you need.</li>
+          <li><strong>Selective Download:</strong> Click <strong>⬇ Download Selected (X)</strong> to save only chosen images without flooding your downloads folder with unwanted graphics.</li>
+          <li><strong>Selective Copying:</strong> Copy URLs of only your selected items directly to your clipboard.</li>
+          <li><strong>Dimension Filters:</strong> Instantly filter between All, High-Res (&gt;1000px), Icons (&lt;120px), JPG, PNG, WebP, and SVG.</li>
+          <li><strong>Lightbox Viewer:</strong> Zoom in on any image with resolution badges and quick single-file download.</li>
+        </ul>
+      </article>
+
+      <!-- 2. Tables to CSV & Markdown -->
+      <article class="feature-deep-card">
+        <h3><span>📊</span> 2. HTML Table to CSV, JSON & Markdown Converter</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-emerald">1-Click CSV</span>
+          <span class="sketch-pill pill-blue">GitHub Markdown</span>
+          <span class="sketch-pill pill-purple">Clean JSON Grid</span>
+        </div>
+        <p>Automatically scans the webpage for structured data tables, benchmark grids, pricing tables, and spreadsheets.</p>
+        <ul>
+          <li>Parses table headers (<code>&lt;th&gt;</code>) and row entries (<code>&lt;tr&gt;/&lt;td&gt;</code>) into structured relational datasets.</li>
+          <li><strong>Export to CSV:</strong> Clean comma-separated spreadsheets ready for Microsoft Excel, Google Sheets, or Python Pandas.</li>
+          <li><strong>Export to Markdown:</strong> Formats tables directly into GitHub-flavored Markdown for technical documentation or LLM context.</li>
+          <li><strong>Inspect in Page:</strong> Highlights the corresponding table on the active webpage with a luminous indicator.</li>
+        </ul>
+      </article>
+
+      <!-- 3. Leads Dossier -->
+      <article class="feature-deep-card">
+        <h3><span>📇</span> 3. B2B Leads & Contacts Dossier</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-pink">Filtered Emails</span>
+          <span class="sketch-pill pill-yellow">Phone Numbers</span>
+          <span class="sketch-pill pill-cyan">12+ Social Channels</span>
+          <span class="sketch-pill pill-emerald">Form Actions</span>
+        </div>
+        <p>Instant intelligence dossier for sales prospecting, security auditing, and competitive research.</p>
+        <ul>
+          <li><strong>Verified Email Extraction:</strong> Filters email addresses against <code>.png</code>, <code>.js</code>, and <code>.css</code> false positives.</li>
+          <li><strong>Phone Extraction:</strong> Detects international and domestic phone numbers via <code>tel:</code> protocol and regex patterns.</li>
+          <li><strong>Social Network Harvester:</strong> Catalogs profiles from LinkedIn, Twitter/X, GitHub, Discord, Telegram, WhatsApp, YouTube, and Instagram.</li>
+          <li><strong>HTML Form Endpoints:</strong> Catalogs form action URLs, submission methods (POST/GET), and field schemas.</li>
+        </ul>
+      </article>
+
+      <!-- 4. AI Clean Markdown -->
+      <article class="feature-deep-card">
+        <h3><span>🤖</span> 4. AI & LLM Clean Markdown Exporter</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-purple">ChatGPT / Claude Ready</span>
+          <span class="sketch-pill pill-blue">Zero Token Waste</span>
+          <span class="sketch-pill pill-emerald">Ad Stripping</span>
+        </div>
+        <p>Transform noisy, ad-cluttered webpages into pristine Markdown context for ChatGPT, Claude, and Gemini.</p>
+        <ul>
+          <li>Strips navigation headers, sidebar widgets, cookie banners, tracking scripts, and footer links.</li>
+          <li>Preserves clean heading hierarchy (H1-H6), blockquotes, lists, and formatted text.</li>
+          <li>Calculates estimated token counts so you know the exact context budget before pasting into AI models.</li>
+          <li>1-Click <strong>Copy for AI</strong> or download as a standalone <code>.md</code> file.</li>
+        </ul>
+      </article>
+
+      <!-- 5. Structured Cards & Feed Extractor -->
+      <article class="feature-deep-card">
+        <h3><span>🗂️</span> 5. Structured Cards & Feeds Extractor</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-yellow">Exact Visual Order</span>
+          <span class="sketch-pill pill-cyan">Product Listings</span>
+          <span class="sketch-pill pill-pink">Article Previews</span>
+        </div>
+        <p>Extract repeating visual entities—like e-commerce catalog items, blog post cards, and directory listings—with all related fields kept together.</p>
+        <ul>
+          <li>Captures <strong>Title, Image, Description, Price, Badge, and Link</strong> in exact DOM order.</li>
+          <li>Copy entire cards in 1-click or export the full catalog as a structured JSON array or CSV.</li>
+          <li>Click <strong>Inspect</strong> to scroll and highlight the card on the live webpage.</li>
+        </ul>
+      </article>
+
+      <!-- 6. Crosshair Point & Pick -->
+      <article class="feature-deep-card">
+        <h3><span>🎯</span> 6. Visual Point & Pick Element Harvester</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-cyan">Interactive Crosshair</span>
+          <span class="sketch-pill pill-purple">CSS Path Generator</span>
+        </div>
+        <p>A visual point-and-click scraping mode inspired by browser devtools inspection tools.</p>
+        <ul>
+          <li>Click the crosshair button in the header or Overview Quick Actions deck.</li>
+          <li>Hover over any element to view its HTML tag, class list, and bounding dimensions.</li>
+          <li>Click to harvest text, nested images, links, outer HTML, and CSS selector directly to your clipboard.</li>
+        </ul>
+      </article>
+
+      <!-- 7. SPA State Inspector -->
+      <article class="feature-deep-card">
+        <h3><span>⚡</span> 7. Single Page Application (SPA) State Inspector</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-blue">Next.js __NEXT_DATA__</span>
+          <span class="sketch-pill pill-emerald">Nuxt __NUXT_DATA__</span>
+          <span class="sketch-pill pill-yellow">Shopify Analytics</span>
+        </div>
+        <p>Bypasses noisy HTML parsing by retrieving raw backend JSON state payloads embedded in modern web frameworks.</p>
+        <ul>
+          <li><strong>Next.js:</strong> Extracts <code>&lt;script id="__NEXT_DATA__"&gt;</code> containing full server-side props and product datasets.</li>
+          <li><strong>Nuxt.js:</strong> Extracts hydration state arrays from <code>__NUXT_DATA__</code>.</li>
+          <li><strong>Shopify:</strong> Accesses raw product catalog objects from <code>window.Shopify</code>.</li>
+          <li>1-Click <strong>Copy Raw JSON</strong> and <strong>Download state.json</strong>.</li>
+        </ul>
+      </article>
+
+      <!-- 8. Security & Leaked Keys Scanner -->
+      <article class="feature-deep-card">
+        <h3><span>🛡️</span> 8. Security & Leaked Credentials Scanner</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-pink">Bug Bounty Ready</span>
+          <span class="sketch-pill pill-yellow">AWS / GCP / Stripe Keys</span>
+        </div>
+        <p>Proactively scans page scripts, inline configuration objects, and environment bundles for accidentally exposed secrets.</p>
+        <ul>
+          <li>Detects AWS Access Keys (<code>AKIA...</code>), Google Cloud / Firebase API keys (<code>AIza...</code>), GitHub PATs, Stripe keys, and JWT bearer tokens.</li>
+          <li>Categorized by severity (CRITICAL, WARNING) in the Cloud & APIs tab.</li>
+          <li>1-Click copy of detected tokens for devsecops audits and remediation.</li>
+        </ul>
+      </article>
+
+      <!-- 9. SEO Health Scorecard -->
+      <article class="feature-deep-card">
+        <h3><span>📈</span> 9. Interactive SEO Health Scorecard (0–100)</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-emerald">Technical Audit</span>
+          <span class="sketch-pill pill-blue">OpenGraph Preview</span>
+        </div>
+        <p>Real-time technical SEO evaluation of the active webpage with an actionable checklist.</p>
+        <ul>
+          <li>Audits Title tag length (ideal: 30–60 chars) and Meta Description presence (ideal: 120–160 chars).</li>
+          <li>Validates canonical link tag, OpenGraph tags (title, image, description), and H1 structure.</li>
+          <li>Displays an interactive visual social preview card.</li>
+        </ul>
+      </article>
+
+      <!-- 10. Whole Website XML Sitemap & Spider -->
+      <article class="feature-deep-card">
+        <h3><span>🗺️</span> 10. XML Sitemap & Multi-Page Crawler Engine</h3>
+        <div class="feature-meta-chips">
+          <span class="sketch-pill pill-purple">Recursive Index Parser</span>
+          <span class="sketch-pill pill-cyan">CDATA & Namespace Safe</span>
+          <span class="sketch-pill pill-yellow">Multi-Page Spider</span>
+        </div>
+        <p>Discover and harvest whole website architectures from XML sitemaps or via an in-browser crawler.</p>
+        <ul>
+          <li>Probes <code>robots.txt</code> and standard paths (<code>/sitemap.xml</code>, <code>/sitemap_index.xml</code>).</li>
+          <li>Recursively traverses nested sitemap indices to extract thousands of leaf URLs.</li>
+          <li>Instant in-page extraction when viewing direct XML files (e.g. <code>myinstants.com/sitemap.xml</code>).</li>
+          <li>Export complete URL lists to <code>.txt</code> or <code>.csv</code> for downstream crawlers.</li>
+        </ul>
+      </article>
+
+    </section>
+
+    <!-- Bottom Download CTA -->
+    <section class="bottom-banner">
+      <div class="sketch-card banner-box">
+        <span class="sketch-tag">✏️ Ready to try all 10 engines?</span>
+        <h2>Download OmniExtract Free for Chrome, Brave & Edge</h2>
+        <p>100% Free • Open Source • Manifest V3 • Zero Telemetry</p>
+        <div style="margin-top: 20px;">
+          <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-lg btn-download">
+            <span>Download OmniExtract (.zip)</span>
+            <span class="btn-sub">v1.0 • 80 KB • Install in 20 seconds</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rich Multi-Column Footer -->
+  <footer class="footer-multi">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-group">
+            <div class="logo-icon">🌐</div>
+            <span class="logo-title">OmniExtract</span>
+          </div>
+          <p>The free, open-source web data harvesting extension. Extract images, tables, feeds, cloud endpoints, and sitemaps in 1 click.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Engines</h4>
+          <ul class="footer-links-list">
+            <li><a href="features.html">Image Harvester</a></li>
+            <li><a href="features.html">Table Converter</a></li>
+            <li><a href="features.html">Leads Dossier</a></li>
+            <li><a href="features.html">AI Markdown</a></li>
+            <li><a href="features.html">XML Sitemap Engine</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Documentation</h4>
+          <ul class="footer-links-list">
+            <li><a href="guide.html">Installation Guide</a></li>
+            <li><a href="docs.html">Keyboard Shortcuts</a></li>
+            <li><a href="docs.html">JSON Schemas</a></li>
+            <li><a href="changelog.html">Version 1.0 Notes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Open Source</h4>
+          <ul class="footer-links-list">
+            <li><a href="https://github.com/antitest1000-cmyk/extract-extention-" target="_blank" rel="noopener">GitHub Repository</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="index.html#why-no-store">Why No $5 Fee?</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 OmniExtract Community • Licensed under MIT License</div>
+        <div>100% Local Browser Sandbox • Zero External Requests</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

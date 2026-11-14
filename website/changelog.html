@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>OmniExtract Changelog — Release Notes & Version 1.0 History</title>
+  <meta name="title" content="OmniExtract Changelog — Release Notes & Version 1.0 History">
+  <meta name="description" content="Detailed release notes for OmniExtract v1.0.0: interactive multi-image selection, two-row command deck, SPA state extractor, leaked secrets scanner, and sitemaps.">
+  <meta name="keywords" content="omniextract changelog, omniextract release notes, chrome extension updates, web harvester version history">
+  <meta name="author" content="OmniExtract Open Source Community">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#fde047">
+  <link rel="canonical" href="https://omniextract.org/changelog.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://omniextract.org/changelog.html">
+  <meta property="og:title" content="OmniExtract Changelog — Version 1.0 Notes">
+  <meta property="og:description" content="Discover everything new in OmniExtract version 1.0.0.">
+  <meta property="og:image" content="icons/icon128.png">
+  <meta property="og:site_name" content="OmniExtract">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://omniextract.org/changelog.html">
+  <meta name="twitter:title" content="OmniExtract Version 1.0 Release Notes">
+  <meta name="twitter:description" content="All release updates and roadmap for OmniExtract.">
+  <meta name="twitter:image" content="icons/icon128.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@400;600&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://omniextract.org/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Changelog",
+        "item": "https://omniextract.org/changelog.html"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="header">
+    <a href="index.html" class="logo-group" style="text-decoration: none; color: inherit;">
+      <div class="logo-icon">🌐</div>
+      <div>
+        <span class="logo-title">OmniExtract</span>
+        <span class="logo-sub">open source • v1.0</span>
+      </div>
+    </a>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-item">Home</a>
+      <a href="features.html" class="nav-item">Features</a>
+      <a href="guide.html" class="nav-item">Install Guide</a>
+      <a href="docs.html" class="nav-item">Documentation</a>
+      <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-sm header-cta">
+        Download .ZIP ↓
+      </a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href="index.html">Home</a>
+      <span class="separator">/</span>
+      <span class="current">Changelog</span>
+    </nav>
+
+    <!-- Subpage Hero -->
+    <section class="subpage-hero">
+      <div class="badge-tag">
+        <span>🚀 Version History</span>
+      </div>
+      <h1>OmniExtract Release Notes & Changelog</h1>
+      <p class="lead">
+        Track new features, performance optimizations, bug fixes, and data extraction engine updates across releases.
+      </p>
+    </section>
+
+    <!-- Version 1.0.0 Entry -->
+    <article class="sketch-card" style="padding: 32px; margin: 30px 0;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-size: 24px; margin: 0;">OmniExtract v1.0.0 — The Initial Production Release</h2>
+          <small style="color: var(--ink-muted); font-size: 13px;">Released on November 14, 2026 • Manifest V3 Compliant</small>
+        </div>
+        <span class="sketch-pill pill-yellow" style="font-weight: 800; font-size: 13px;">LATEST RELEASE</span>
+      </div>
+
+      <p style="color: #334155; line-height: 1.6; margin-bottom: 20px;">
+        OmniExtract 1.0 represents a complete, unified suite for web data harvesting, asset archiving, lead generation, and SEO analysis directly inside your Chromium browser.
+      </p>
+
+      <h3 style="font-size: 18px; margin-bottom: 8px;">✨ Key Highlights</h3>
+      <ul style="color: #334155; line-height: 1.7; padding-left: 20px;">
+        <li><strong>Interactive Multi-Image Selection:</strong> Check individual image boxes or <code>Ctrl/Shift + Click</code> cards to selectively download only desired images via <em>"⬇ Download Selected"</em>.</li>
+        <li><strong>Zero-Scroll Two-Row Command Deck:</strong> 10 distinct extraction engines organized into two 5-tab rows with instant hotkeys (<code>Alt+1</code> through <code>Alt+0</code>).</li>
+        <li><strong>XML Sitemap Index Engine:</strong> Fully recursive sitemap traversal with XML namespace tolerance and CDATA block parsing.</li>
+        <li><strong>SPA Backend State Inspector:</strong> Instantly grabs raw backend state from Next.js (<code>__NEXT_DATA__</code>), Nuxt (<code>__NUXT_DATA__</code>), and Shopify.</li>
+        <li><strong>Security & Leaked API Keys Scanner:</strong> Proactively scans bundles for exposed AWS keys, Google API keys, Stripe tokens, and JWTs.</li>
+        <li><strong>Technical SEO Health Scorecard (0–100):</strong> Dynamic audit score with interactive checks for title length, meta description, canonicals, and OpenGraph tags.</li>
+        <li><strong>Visual Crosshair Point & Pick Harvester:</strong> Click anywhere on a page to extract text, HTML, and CSS selectors directly to your clipboard.</li>
+        <li><strong>Full-Screen Pro Viewer:</strong> Dedicated dashboard (<code>viewer.html</code>) for searching and filtering large datasets.</li>
+      </ul>
+
+      <h3 style="font-size: 18px; margin: 24px 0 8px 0;">🐛 Bug Fixes & Hardening</h3>
+      <ul style="color: #334155; line-height: 1.7; padding-left: 20px;">
+        <li>Resolved temporal dead zone initialization bug on dynamic DOM mutation scans.</li>
+        <li>Added strict 2.5s <code>AbortController</code> timeouts on <code>robots.txt</code> background fetches to prevent hanging on rate-limited sites.</li>
+        <li>Fixed Chrome XML viewer DOM quirks using namespace-agnostic element selection.</li>
+      </ul>
+    </article>
+
+    <!-- Roadmap Entry -->
+    <article class="sketch-card" style="padding: 32px; margin: 30px 0; background: #fafafa;">
+      <h2 style="font-size: 20px; margin-bottom: 8px;">🔮 Upcoming in v1.1.0 Roadmap</h2>
+      <ul style="color: #334155; line-height: 1.7; padding-left: 20px;">
+        <li>PDF document text and table extraction engine.</li>
+        <li>One-click export directly to Google Sheets via OAuth.</li>
+        <li>Automatic pagination detection for multi-page category listings.</li>
+      </ul>
+    </article>
+
+  </main>
+
+  <!-- Rich Multi-Column Footer -->
+  <footer class="footer-multi">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-group">
+            <div class="logo-icon">🌐</div>
+            <span class="logo-title">OmniExtract</span>
+          </div>
+          <p>The free, open-source web data harvesting extension. Extract images, tables, feeds, cloud endpoints, and sitemaps in 1 click.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Engines</h4>
+          <ul class="footer-links-list">
+            <li><a href="features.html">Image Harvester</a></li>
+            <li><a href="features.html">Table Converter</a></li>
+            <li><a href="features.html">Leads Dossier</a></li>
+            <li><a href="features.html">AI Markdown</a></li>
+            <li><a href="features.html">XML Sitemap Engine</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Documentation</h4>
+          <ul class="footer-links-list">
+            <li><a href="guide.html">Installation Guide</a></li>
+            <li><a href="docs.html">Keyboard Shortcuts</a></li>
+            <li><a href="docs.html">JSON Schemas</a></li>
+            <li><a href="changelog.html">Version 1.0 Notes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Open Source</h4>
+          <ul class="footer-links-list">
+            <li><a href="https://github.com/antitest1000-cmyk/extract-extention-" target="_blank" rel="noopener">GitHub Repository</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="index.html#why-no-store">Why No $5 Fee?</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 OmniExtract Community • Licensed under MIT License</div>
+        <div>100% Local Browser Sandbox • Zero External Requests</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

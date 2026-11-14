@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>OmniExtract Documentation — Shortcuts, Schemas & Architecture Guide</title>
+  <meta name="title" content="OmniExtract Documentation — Shortcuts, Schemas & Architecture Guide">
+  <meta name="description" content="Technical reference for OmniExtract: keyboard shortcuts, JSON schemas for images, tables, leads, cards, and XML sitemaps, and local sandboxed architecture.">
+  <meta name="keywords" content="omniextract documentation, web scraper json schema, keyboard shortcuts extension, sitemap parser schema, table to json schema, extract cards format">
+  <meta name="author" content="OmniExtract Open Source Community">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#fde047">
+  <link rel="canonical" href="https://omniextract.org/docs.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://omniextract.org/docs.html">
+  <meta property="og:title" content="OmniExtract Documentation — Shortcuts & Schemas">
+  <meta property="og:description" content="Technical documentation, hotkeys, and JSON schema specs for extracted web datasets.">
+  <meta property="og:image" content="icons/icon128.png">
+  <meta property="og:site_name" content="OmniExtract">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://omniextract.org/docs.html">
+  <meta name="twitter:title" content="OmniExtract Documentation">
+  <meta name="twitter:description" content="Reference guide for schemas, shortcuts, and architecture.">
+  <meta name="twitter:image" content="icons/icon128.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon16.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@400;600&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data: TechArticle & BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://omniextract.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Documentation",
+            "item": "https://omniextract.org/docs.html"
+          }
+        ]
+      },
+      {
+        "@type": "TechArticle",
+        "headline": "OmniExtract Technical Documentation & JSON Schema Specifications",
+        "description": "Complete reference of keyboard navigation hotkeys, data structure schemas, and client-side sandboxed architecture.",
+        "author": {
+          "@type": "Organization",
+          "name": "OmniExtract Open Source Community"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="header">
+    <a href="index.html" class="logo-group" style="text-decoration: none; color: inherit;">
+      <div class="logo-icon">🌐</div>
+      <div>
+        <span class="logo-title">OmniExtract</span>
+        <span class="logo-sub">open source • v1.0</span>
+      </div>
+    </a>
+
+    <nav class="nav-links">
+      <a href="index.html" class="nav-item">Home</a>
+      <a href="features.html" class="nav-item">Features</a>
+      <a href="guide.html" class="nav-item">Install Guide</a>
+      <a href="docs.html" class="nav-item highlight-link">Documentation</a>
+      <a href="OmniExtract-v1.0.zip" download class="btn-sketchy btn-sm header-cta">
+        Download .ZIP ↓
+      </a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href="index.html">Home</a>
+      <span class="separator">/</span>
+      <span class="current">Documentation</span>
+    </nav>
+
+    <!-- Subpage Hero -->
+    <section class="subpage-hero">
+      <div class="badge-tag">
+        <span>📖 Technical Reference</span>
+      </div>
+      <h1>Developer Documentation & Data Schemas</h1>
+      <p class="lead">
+        Learn how OmniExtract parses web pages, navigates with zero-latency keyboard shortcuts, formats extracted JSON data, and guarantees 100% client-side privacy.
+      </p>
+    </section>
+
+    <!-- Section 1: Keyboard Shortcuts -->
+    <section class="sketch-card" style="padding: 28px; margin: 28px 0;">
+      <h2 style="font-size: 22px; margin-bottom: 12px;">⌨️ Keyboard Shortcuts Reference</h2>
+      <p style="color: #475569; margin-bottom: 16px;">OmniExtract features a 2-row command deck designed for rapid keyboard operation:</p>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; border: 2px solid var(--ink-black);">
+          <thead>
+            <tr style="background: var(--marker-yellow); border-bottom: 2px solid var(--ink-black); text-align: left;">
+              <th style="padding: 10px 14px;">Shortcut</th>
+              <th style="padding: 10px 14px;">Action</th>
+              <th style="padding: 10px 14px;">Target View / Engine</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 1</td>
+              <td style="padding: 8px 14px;">Switch to Overview & SEO Audit</td>
+              <td style="padding: 8px 14px;">Tab 1: Overview</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 2</td>
+              <td style="padding: 8px 14px;">Switch to Image Harvester & Gallery</td>
+              <td style="padding: 8px 14px;">Tab 2: Images</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 3</td>
+              <td style="padding: 8px 14px;">Switch to Video & Audio Harvester</td>
+              <td style="padding: 8px 14px;">Tab 3: Media</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 4</td>
+              <td style="padding: 8px 14px;">Switch to Structured Cards & Feeds</td>
+              <td style="padding: 8px 14px;">Tab 4: Cards</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 5</td>
+              <td style="padding: 8px 14px;">Switch to HTML Tables (CSV/JSON/MD)</td>
+              <td style="padding: 8px 14px;">Tab 5: Tables</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 6</td>
+              <td style="padding: 8px 14px;">Switch to B2B Leads & Contacts</td>
+              <td style="padding: 8px 14px;">Tab 6: Leads</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 7</td>
+              <td style="padding: 8px 14px;">Switch to Cloud Infrastructure & Secrets</td>
+              <td style="padding: 8px 14px;">Tab 7: Cloud & APIs</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 8</td>
+              <td style="padding: 8px 14px;">Switch to All Page Links Catalog</td>
+              <td style="padding: 8px 14px;">Tab 8: Links</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 9</td>
+              <td style="padding: 8px 14px;">Switch to XML Sitemap Engine</td>
+              <td style="padding: 8px 14px;">Tab 9: Sitemap</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Alt + 0</td>
+              <td style="padding: 8px 14px;">Switch to Multi-Page Site Crawler</td>
+              <td style="padding: 8px 14px;">Tab 10: Spider</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #cbd5e1;">
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Arrow Left / Right</td>
+              <td style="padding: 8px 14px;">Cycle sequentially between tabs</td>
+              <td style="padding: 8px 14px;">Command Deck</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 14px; font-family: var(--font-mono); font-weight: 700;">Ctrl / Shift + Click</td>
+              <td style="padding: 8px 14px;">Toggle image selection checkbox</td>
+              <td style="padding: 8px 14px;">Images Gallery</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 2: Data Schemas -->
+    <section class="sketch-card" style="padding: 28px; margin: 28px 0;">
+      <h2 style="font-size: 22px; margin-bottom: 12px;">📊 JSON Data Export Schemas</h2>
+      <p style="color: #475569;">When you click <strong>"Export JSON"</strong> in OmniExtract, the extension returns an interoperable dataset formatted according to the following specifications:</p>
+
+      <h3 style="font-size: 16px; margin: 20px 0 6px 0;">1. Structured Cards Schema (<code>data.cards</code>)</h3>
+      <div class="docs-code-box">
+{
+  "id": "omni_card_1",
+  "title": "Cloud Computing Infrastructure Suite",
+  "image": "https://example.com/assets/cloud-banner.webp",
+  "alt": "Cloud Computing Infrastructure Suite",
+  "description": "High-performance distributed storage with sub-millisecond object retrieval.",
+  "price": "$49.00 / mo",
+  "badge": "Popular",
+  "link": "https://example.com/products/cloud-suite",
+  "linkText": "View Product Details",
+  "domPath": "DIV.product-grid > DIV.product-card:nth-of-type(1)"
+}
+      </div>
+
+      <h3 style="font-size: 16px; margin: 20px 0 6px 0;">2. HTML Tables Schema (<code>data.tables</code>)</h3>
+      <div class="docs-code-box">
+{
+  "id": "omni_table_1",
+  "caption": "Quarterly Performance Benchmarks",
+  "headers": ["Region", "Throughput (GB/s)", "Latency (ms)", "Status"],
+  "rows": [
+    ["US-East (N. Virginia)", "12.4", "18ms", "Operational"],
+    ["EU-West (Frankfurt)", "10.8", "24ms", "Operational"]
+  ],
+  "csv": "Region,Throughput (GB/s),Latency (ms),Status\nUS-East (N. Virginia),12.4,18ms,Operational\n...",
+  "markdown": "| Region | Throughput (GB/s) | Latency (ms) | Status |\n|---|---|---|---|\n| US-East | 12.4 | 18ms | Operational |"
+}
+      </div>
+
+      <h3 style="font-size: 16px; margin: 20px 0 6px 0;">3. Leads & Contacts Schema (<code>data.contacts</code>)</h3>
+      <div class="docs-code-box">
+{
+  "emails": ["enterprise@company.com", "press@corp.org"],
+  "phones": ["+1 (800) 555-0199", "+44 20 7946 0991"],
+  "socials": [
+    { "platform": "GitHub", "url": "https://github.com/company", "handle": "company" },
+    { "platform": "Twitter", "url": "https://twitter.com/company", "handle": "@company" }
+  ]
+}
+      </div>
+
+      <h3 style="font-size: 16px; margin: 20px 0 6px 0;">4. Framework State & Leaked Secrets (<code>data.frameworkState</code>)</h3>
+      <div class="docs-code-box">
+{
+  "frameworks": ["Next.js", "React", "Tailwind CSS"],
+  "rawStateType": "next",
+  "stateSize": 28410,
+  "rawState": {
+    "props": { "pageProps": { "products": [ ... ] } }
+  },
+  "secrets": [
+    {
+      "type": "Google Cloud API Key",
+      "severity": "WARNING",
+      "preview": "AIzaSyD-9x...",
+      "fullValue": "AIzaSyD-9xK1mQ4vR8tY2pL7nO5wX3zB1vN6m"
+    }
+  ]
+}
+      </div>
+    </section>
+
+    <!-- Section 3: Architecture & Privacy -->
+    <section class="sketch-card" style="padding: 28px; margin: 28px 0;">
+      <h2 style="font-size: 22px; margin-bottom: 12px;">🛡️ Architecture & Local Isolation Guarantee</h2>
+      <p style="color: #475569; line-height: 1.6;">
+        Unlike commercial scrapers that route web traffic through remote proxy networks or third-party servers, OmniExtract executes exclusively within your browser's private V8 JavaScript engine.
+      </p>
+      <ul>
+        <li><strong>No External Telemetry:</strong> OmniExtract contains zero Google Analytics, Mixpanel, Sentry, or tracking pixels.</li>
+        <li><strong>No Cloud Backend:</strong> All DOM parsing, table formatting, and XML processing occur in memory on your computer.</li>
+        <li><strong>Open Source Auditability:</strong> The complete unpacked extension source code is fully readable and modifiable under the MIT license.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- Rich Multi-Column Footer -->
+  <footer class="footer-multi">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-group">
+            <div class="logo-icon">🌐</div>
+            <span class="logo-title">OmniExtract</span>
+          </div>
+          <p>The free, open-source web data harvesting extension. Extract images, tables, feeds, cloud endpoints, and sitemaps in 1 click.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Engines</h4>
+          <ul class="footer-links-list">
+            <li><a href="features.html">Image Harvester</a></li>
+            <li><a href="features.html">Table Converter</a></li>
+            <li><a href="features.html">Leads Dossier</a></li>
+            <li><a href="features.html">AI Markdown</a></li>
+            <li><a href="features.html">XML Sitemap Engine</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Documentation</h4>
+          <ul class="footer-links-list">
+            <li><a href="guide.html">Installation Guide</a></li>
+            <li><a href="docs.html">Keyboard Shortcuts</a></li>
+            <li><a href="docs.html">JSON Schemas</a></li>
+            <li><a href="changelog.html">Version 1.0 Notes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Open Source</h4>
+          <ul class="footer-links-list">
+            <li><a href="https://github.com/antitest1000-cmyk/extract-extention-" target="_blank" rel="noopener">GitHub Repository</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="index.html#why-no-store">Why No $5 Fee?</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 OmniExtract Community • Licensed under MIT License</div>
+        <div>100% Local Browser Sandbox • Zero External Requests</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
