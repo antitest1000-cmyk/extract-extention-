@@ -569,8 +569,71 @@
   }
 
   /**
-   * 2. IMAGES ACCUMULATOR
-   * Persists all images encountered across infinite scroll sessions
+   * Generates a normalized deduplication fingerprint for image URLs.
+   * Eliminates duplicate entries caused by responsive CDN parameters (w=400 vs w=800)
+   * or WordPress thumbnail suffixes (-300x200.jpg vs .jpg).
+   */
+  function getImageDedupeKey(url) {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('data:')) {
+      return `data:${url.length}:${url.slice(0, 80)}`;
+    }
+    try {
+      const u = new URL(url);
+      let pathname = u.pathname.toLowerCase();
+      // Strip common thumbnail and density suffixes: -300x200, _600x400, @2x
+      pathname = pathname.replace(/[-_]\d+x\d+(?=\.[a-z0-9]+$)/i, '')
+                         .replace(/@\d+x(?=\.[a-z0-9]+$)/i, '')
+                         .replace(/[-_](thumb|thumbnail|small|medium|large|card|preview)(?=\.[a-z0-9]+$)/i, '');
+
+      // Strip query parameters that only represent resizing/compression
+      const resizeParams = new Set([
+        'w', 'width', 'h', 'height', 'maxwidth', 'maxheight',
+        'fit', 'crop', 'auto', 'format', 'quality', 'q',
+        'v', 'version', 'size', 'resize', 'scale', 'dpr'
+      ]);
+      const searchParams = new URLSearchParams();
+      u.searchParams.forEach((val, key) => {
+        if (!resizeParams.has(key.toLowerCase())) {
+          searchParams.append(key, val);
+        }
+      });
+      const remainingSearch = searchParams.toString();
+      return `${u.host}${pathname}${remainingSearch ? '?' + remainingSearch : ''}`;
+    } catch (e) {
+      return url.split('?')[0].toLowerCase();
+    }
+  }
+
+  /**
+   * Extracts the single highest-resolution candidate from a srcset string
+   */
+  function getBestUrlFromSrcset(srcset) {
+    if (!srcset || typeof srcset !== 'string') return null;
+    const candidates = [];
+    const entries = srcset.split(',');
+    for (const entry of entries) {
+      const parts = entry.trim().split(/\s+/);
+      const rawUrl = parts[0];
+      if (!rawUrl) continue;
+      let width = 0;
+      if (parts[1]) {
+        if (parts[1].endsWith('w')) {
+          width = parseInt(parts[1], 10) || 0;
+        } else if (parts[1].endsWith('x')) {
+          width = Math.round((parseFloat(parts[1]) || 1) * 1000);
+        }
+      }
+      candidates.push({ url: rawUrl, width });
+    }
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => b.width - a.width);
+    return candidates[0];
+  }
+
+  /**
+   * 2. IMAGES ACCUMULATOR (Deduplication-Hardened Pro Engine)
+   * Prevents multi-resolution duplicates while guaranteeing the highest quality asset is saved
    */
   function extractImagesIntoStore() {
     const addImage = (src, details = {}) => {
@@ -585,14 +648,10 @@
         return;
       }
 
-      if (store.images.has(absoluteUrl)) {
-        const existing = store.images.get(absoluteUrl);
-        if (details.alt && !existing.alt) existing.alt = details.alt;
-        if (details.width && !existing.width) existing.width = details.width;
-        if (details.height && !existing.height) existing.height = details.height;
-        return;
-      }
+      const dedupeKey = getImageDedupeKey(absoluteUrl);
+      if (!dedupeKey) return;
 
+      // Detect file extension
       let ext = 'IMG';
       if (absoluteUrl.startsWith('data:image/')) {
         const match = absoluteUrl.match(/^data:image\/([a-zA-Z0-9+]+);/);
@@ -606,23 +665,56 @@
         } catch (e) {}
       }
 
-      store.images.set(absoluteUrl, {
+      const w = details.width || 0;
+      const h = details.height || 0;
+
+      // Deduplication check: if we already have this image, upgrade to higher resolution if available
+      if (store.images.has(dedupeKey)) {
+        const existing = store.images.get(dedupeKey);
+        const existingArea = (existing.width || 0) * (existing.height || 0);
+        const newArea = w * h;
+
+        // Upgrade if new variant has higher dimensions or better srcset descriptor
+        if (newArea > existingArea || (!existing.width && w)) {
+          existing.url = absoluteUrl;
+          existing.width = w;
+          existing.height = h;
+          existing.format = ext;
+        }
+        if (details.alt && !existing.alt) existing.alt = details.alt;
+        if (details.title && !existing.title) existing.title = details.title;
+        return;
+      }
+
+      store.images.set(dedupeKey, {
         url: absoluteUrl,
         alt: details.alt || '',
         title: details.title || '',
-        width: details.width || 0,
-        height: details.height || 0,
+        width: w,
+        height: h,
         type: details.type || 'img',
         format: ext,
         isDataUri: absoluteUrl.startsWith('data:')
       });
     };
 
-    // 2a. All <img> elements
+    // 2a. All <img> elements: pick the best high-res source directly
     document.querySelectorAll('img').forEach(img => {
-      const src = img.currentSrc || img.src || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src');
-      const w = img.naturalWidth || img.width || parseInt(img.getAttribute('width') || '0', 10);
-      const h = img.naturalHeight || img.height || parseInt(img.getAttribute('height') || '0', 10);
+      let src = img.currentSrc || img.src || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src') || img.getAttribute('data-high-res-src');
+      let w = img.naturalWidth || img.width || parseInt(img.getAttribute('width') || '0', 10);
+      let h = img.naturalHeight || img.height || parseInt(img.getAttribute('height') || '0', 10);
+
+      // If srcset exists, extract the single best high-res candidate
+      const srcset = img.srcset || img.getAttribute('data-srcset');
+      if (srcset) {
+        const bestCandidate = getBestUrlFromSrcset(srcset);
+        if (bestCandidate && bestCandidate.url) {
+          src = bestCandidate.url;
+          if (bestCandidate.width && (!w || bestCandidate.width > w)) {
+            w = bestCandidate.width;
+          }
+        }
+      }
 
       addImage(src, {
         alt: img.alt || img.getAttribute('aria-label') || '',
@@ -631,18 +723,30 @@
         height: h,
         type: 'img'
       });
-
-      const srcset = img.srcset || img.getAttribute('data-srcset');
-      if (srcset) {
-        parseSrcset(srcset).forEach(c => addImage(c.url, { alt: img.alt || '', type: 'srcset' }));
-      }
     });
 
-    // 2b. Picture sources
-    document.querySelectorAll('picture source, source').forEach(source => {
-      const srcset = source.srcset || source.getAttribute('data-srcset') || source.src;
-      if (srcset) {
-        parseSrcset(srcset).forEach(c => addImage(c.url, { type: 'picture-source' }));
+    // 2b. <picture> elements: extract best high-res source per picture
+    document.querySelectorAll('picture').forEach(picture => {
+      const sources = Array.from(picture.querySelectorAll('source'));
+      let bestSourceUrl = null;
+      let maxWidth = 0;
+      for (const s of sources) {
+        const srcset = s.srcset || s.getAttribute('data-srcset') || s.src;
+        if (srcset) {
+          const candidate = getBestUrlFromSrcset(srcset);
+          if (candidate && candidate.width >= maxWidth) {
+            maxWidth = candidate.width;
+            bestSourceUrl = candidate.url;
+          }
+        }
+      }
+      if (bestSourceUrl) {
+        const imgInside = picture.querySelector('img');
+        addImage(bestSourceUrl, {
+          alt: imgInside?.alt || '',
+          width: maxWidth,
+          type: 'picture'
+        });
       }
     });
 
@@ -655,7 +759,7 @@
 
     // 2d. CSS background images (scans current viewport elements)
     const elements = document.querySelectorAll('header, nav, main, section, div, span, button, a, figure, banner');
-    const maxScan = Math.min(elements.length, 350);
+    const maxScan = Math.min(elements.length, 300);
     for (let i = 0; i < maxScan; i++) {
       try {
         const bg = window.getComputedStyle(elements[i]).backgroundImage;
@@ -670,14 +774,6 @@
         }
       } catch (e) {}
     }
-  }
-
-  function parseSrcset(srcset) {
-    if (!srcset) return [];
-    return srcset.split(',').map(entry => {
-      const parts = entry.trim().split(/\s+/);
-      return { url: parts[0], descriptor: parts[1] || '' };
-    }).filter(c => !!c.url);
   }
 
   /**

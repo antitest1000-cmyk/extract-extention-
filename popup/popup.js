@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * Populate UI with extracted data
    */
   function populateData(data) {
+    if (data && data.images) data.images = deduplicateImages(data.images);
     state.pageData = data;
 
     // Badges
@@ -540,10 +541,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /**
+   * Deduplicates image list using normalized base keys and picks the highest resolution version
+   */
+  function getImageDedupeKey(url) {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('data:')) return `data:${url.length}:${url.slice(0, 80)}`;
+    try {
+      const u = new URL(url);
+      let pathname = u.pathname.toLowerCase();
+      pathname = pathname.replace(/[-_]\d+x\d+(?=\.[a-z0-9]+$)/i, '')
+                         .replace(/@\d+x(?=\.[a-z0-9]+$)/i, '')
+                         .replace(/[-_](thumb|thumbnail|small|medium|large|card|preview)(?=\.[a-z0-9]+$)/i, '');
+      const resizeParams = new Set(['w', 'width', 'h', 'height', 'maxwidth', 'maxheight', 'fit', 'crop', 'auto', 'format', 'quality', 'q', 'v', 'version', 'size', 'resize', 'scale', 'dpr']);
+      const searchParams = new URLSearchParams();
+      u.searchParams.forEach((val, key) => {
+        if (!resizeParams.has(key.toLowerCase())) searchParams.append(key, val);
+      });
+      const remainingSearch = searchParams.toString();
+      return `${u.host}${pathname}${remainingSearch ? '?' + remainingSearch : ''}`;
+    } catch (e) {
+      return url.split('?')[0].toLowerCase();
+    }
+  }
+
+  function deduplicateImages(list) {
+    if (!list || !Array.isArray(list)) return [];
+    const map = new Map();
+    for (const img of list) {
+      if (!img || !img.url) continue;
+      const key = getImageDedupeKey(img.url);
+      if (!map.has(key)) {
+        map.set(key, img);
+      } else {
+        const existing = map.get(key);
+        const existingArea = (existing.width || 0) * (existing.height || 0);
+        const newArea = (img.width || 0) * (img.height || 0);
+        if (newArea > existingArea || (!existing.width && img.width)) {
+          map.set(key, img);
+        }
+      }
+    }
+    return Array.from(map.values());
+  }
+
   function renderImagesTab() {
     if (!state.pageData || !state.pageData.images) return;
 
-    let items = state.pageData.images;
+    let items = deduplicateImages(state.pageData.images);
 
     // Apply format or dimension filter
     if (state.imageFormatFilter !== 'all') {
