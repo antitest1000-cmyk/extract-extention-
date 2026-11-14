@@ -45,9 +45,15 @@
     floatingBadge: null
   };
 
-  // State & counters (declared at top before any scan functions execute)
-  let cardIdCounter = (window.__omniCardIdCounter = window.__omniCardIdCounter || 1);
-  let tableIdCounter = (window.__omniTableIdCounter = window.__omniTableIdCounter || 1);
+  // Persistent ID generators (immune to TDZ, hoisting, and re-injections)
+  function getNextCardId() {
+    window.__omniCardIdCounter = (window.__omniCardIdCounter || 0) + 1;
+    return 'omni_card_' + window.__omniCardIdCounter;
+  }
+  function getNextTableId() {
+    window.__omniTableIdCounter = (window.__omniTableIdCounter || 0) + 1;
+    return 'omni_table_' + window.__omniTableIdCounter;
+  }
   let pickerActive = false;
   let hoveredEl = null;
   let activeMutationObserver = null;
@@ -253,45 +259,251 @@
       },
       technologies: detectTechStack(),
       stats: getPageStats(),
-      inPageSitemap: extractInPageSitemap()
+      inPageSitemap: extractInPageSitemap(),
+      frameworkState: extractFrameworkStateAndSecrets(),
+      seoAudit: computeSeoAudit()
     };
   }
 
   /**
    * IN-PAGE XML SITEMAP EXTRACTION (Instant detection if active page is an XML sitemap)
    */
+
+  /**
+   * FRAMEWORK & SPA STATE EXTRACTOR (__NEXT_DATA__, Nuxt, Shopify) & SECRETS SCANNER
+   */
+  function extractFrameworkStateAndSecrets() {
+    const findings = {
+      frameworks: [],
+      rawState: null,
+      rawStateType: null,
+      stateSize: 0,
+      secrets: []
+    };
+
+    try {
+      // 1. Next.js __NEXT_DATA__
+      const nextDataEl = document.getElementById('__NEXT_DATA__');
+      if (nextDataEl && nextDataEl.textContent) {
+        try {
+          const parsed = JSON.parse(nextDataEl.textContent);
+          findings.rawState = parsed;
+          findings.rawStateType = 'Next.js (__NEXT_DATA__)';
+          findings.stateSize = nextDataEl.textContent.length;
+          findings.frameworks.push('Next.js');
+        } catch (e) {}
+      }
+
+      // 2. Nuxt __NUXT_DATA__ or __NUXT__
+      const nuxtDataEl = document.getElementById('__NUXT_DATA__');
+      if (nuxtDataEl && nuxtDataEl.textContent) {
+        try {
+          const parsed = JSON.parse(nuxtDataEl.textContent);
+          if (!findings.rawState) {
+            findings.rawState = parsed;
+            findings.rawStateType = 'Nuxt.js (__NUXT_DATA__)';
+            findings.stateSize = nuxtDataEl.textContent.length;
+          }
+          findings.frameworks.push('Nuxt.js');
+        } catch (e) {}
+      }
+
+      // 3. Shopify detection
+      if (window.Shopify || document.querySelector('script[id*="shopify" i]')) {
+        findings.frameworks.push('Shopify');
+      }
+
+      // 4. Scan page HTML for exposed secrets and API keys
+      const htmlToScan = document.documentElement ? document.documentElement.outerHTML : '';
+      const secretPatterns = [
+        { type: 'AWS Access Key', regex: /\b(AKIA[0-9A-Z]{16})\b/g, severity: 'critical' },
+        { type: 'Google API Key', regex: /\b(AIza[0-9A-Za-z\-_]{35})\b/g, severity: 'warning' },
+        { type: 'GitHub Token', regex: /\b(ghp_[0-9a-zA-Z]{36}|github_pat_[0-9a-zA-Z_]{22,})\b/g, severity: 'critical' },
+        { type: 'Stripe API Key', regex: /\b(sk_live_[0-9a-zA-Z]{24}|pk_live_[0-9a-zA-Z]{24})\b/g, severity: 'critical' },
+        { type: 'Slack Token', regex: /\b(xox[baprs]-[0-9a-zA-Z]{10,48})\b/g, severity: 'critical' },
+        { type: 'JSON Web Token (JWT)', regex: /\b(eyJ[a-zA-Z0-9_\-]{10,}\.eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,})\b/g, severity: 'info' }
+      ];
+
+      const detected = [];
+      const seenRaw = new Set();
+      secretPatterns.forEach(pat => {
+        const matches = htmlToScan.match(pat.regex) || [];
+        matches.forEach(val => {
+          if (!seenRaw.has(val)) {
+            seenRaw.add(val);
+            const masked = val.length > 12 ? val.slice(0, 6) + '••••••••' + val.slice(-4) : val.slice(0, 3) + '••••';
+            detected.push({
+              type: pat.type,
+              masked: masked,
+              raw: val,
+              severity: pat.severity
+            });
+          }
+        });
+      });
+
+      findings.secrets = detected.slice(0, 20);
+    } catch (err) {
+      console.warn('[OmniExtract] State/secrets error:', err);
+    }
+
+    return findings;
+  }
+
+  /**
+   * COMPREHENSIVE SEO HEALTH SCORE & AUDIT
+   */
+  function computeSeoAudit() {
+    const meta = extractMetadata();
+    const headings = extractHeadings();
+    let score = 100;
+    const checks = [];
+
+    // Title Tag
+    const title = meta.title || '';
+    if (!title) {
+      score -= 25;
+      checks.push({ name: 'Page Title', status: 'fail', message: 'Missing <title> tag' });
+    } else if (title.length < 30 || title.length > 65) {
+      score -= 8;
+      checks.push({ name: 'Title Length', status: 'warn', message: `${title.length} chars (Best: 30-65 chars)` });
+    } else {
+      checks.push({ name: 'Page Title', status: 'pass', message: `${title.length} chars (Optimal length)` });
+    }
+
+    // Meta Description
+    const desc = meta.description || '';
+    if (!desc) {
+      score -= 20;
+      checks.push({ name: 'Meta Description', status: 'fail', message: 'Missing meta description' });
+    } else if (desc.length < 70 || desc.length > 160) {
+      score -= 6;
+      checks.push({ name: 'Description Length', status: 'warn', message: `${desc.length} chars (Best: 70-160 chars)` });
+    } else {
+      checks.push({ name: 'Meta Description', status: 'pass', message: `${desc.length} chars (Optimal length)` });
+    }
+
+    // Canonical Link
+    if (meta.canonical) {
+      checks.push({ name: 'Canonical Tag', status: 'pass', message: 'Configured properly' });
+    } else {
+      score -= 10;
+      checks.push({ name: 'Canonical Tag', status: 'warn', message: 'Missing rel="canonical" tag' });
+    }
+
+    // OpenGraph Tags
+    const og = meta.openGraph || {};
+    if (og['og:title'] && og['og:image']) {
+      checks.push({ name: 'Social OpenGraph', status: 'pass', message: 'og:title & og:image present' });
+    } else {
+      score -= 10;
+      checks.push({ name: 'Social OpenGraph', status: 'warn', message: 'Incomplete social preview tags' });
+    }
+
+    // H1 Heading
+    const h1s = headings.filter(h => h.level.toLowerCase() === 'h1');
+    if (h1s.length === 1) {
+      checks.push({ name: 'H1 Structure', status: 'pass', message: 'Single primary H1 heading' });
+    } else if (h1s.length === 0) {
+      score -= 15;
+      checks.push({ name: 'H1 Structure', status: 'fail', message: 'No <h1> heading detected on page' });
+    } else {
+      score -= 5;
+      checks.push({ name: 'H1 Structure', status: 'warn', message: `Multiple (${h1s.length}) <h1> headings found` });
+    }
+
+    return {
+      score: Math.max(0, score),
+      checks
+    };
+  }
+
   function extractInPageSitemap() {
     try {
-      const isXml = (document.contentType && document.contentType.includes('xml')) || 
-                    Boolean(document.querySelector('sitemapindex, urlset, sitemap')) ||
+      const isXml = (document.contentType && (document.contentType.includes('xml') || document.contentType.includes('text/plain'))) || 
+                    Boolean(document.querySelector('sitemapindex, urlset, sitemap, [xmlns*="sitemap"]')) ||
                     window.location.pathname.endsWith('.xml') ||
                     window.location.pathname.includes('sitemap');
 
       if (!isXml) return null;
 
-      const locElements = document.querySelectorAll('loc');
-      if (!locElements || locElements.length === 0) return null;
+      // 1. Try namespace-agnostic DOM element selection first
+      let locElements = Array.from(document.getElementsByTagNameNS ? document.getElementsByTagNameNS('*', 'loc') : []);
+      if (locElements.length === 0) {
+        locElements = Array.from(document.getElementsByTagName('loc'));
+      }
+      if (locElements.length === 0) {
+        locElements = Array.from(document.querySelectorAll('loc'));
+      }
 
-      const sitemapElements = document.querySelectorAll('sitemap');
-      const isIndex = sitemapElements.length > 0 || Boolean(document.querySelector('sitemapindex'));
+      const isIndex = Boolean(
+        (document.getElementsByTagNameNS && document.getElementsByTagNameNS('*', 'sitemapindex').length > 0) ||
+        (document.getElementsByTagNameNS && document.getElementsByTagNameNS('*', 'sitemap').length > 0) ||
+        document.getElementsByTagName('sitemapindex').length > 0 ||
+        document.getElementsByTagName('sitemap').length > 0 ||
+        document.querySelector('sitemapindex, sitemap') ||
+        (document.documentElement && document.documentElement.nodeName.toLowerCase().includes('sitemapindex'))
+      );
 
       const urls = [];
-      locElements.forEach(el => {
-        const text = (el.textContent || el.innerText || '').trim();
-        if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
-          const parent = el.parentElement;
-          const lastmod = parent ? (parent.querySelector('lastmod')?.textContent?.trim() || '') : '';
-          const changefreq = parent ? (parent.querySelector('changefreq')?.textContent?.trim() || '') : '';
-          const priority = parent ? (parent.querySelector('priority')?.textContent?.trim() || '') : '';
-          urls.push({
-            url: text,
-            lastmod,
-            changefreq,
-            priority,
-            source: isIndex ? 'Sitemap Index Entry' : 'Active XML Page'
-          });
+      if (locElements.length > 0) {
+        locElements.forEach(el => {
+          const text = (el.textContent || el.innerText || '').trim();
+          if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
+            const parent = el.parentElement;
+            let lastmod = '';
+            let changefreq = '';
+            let priority = '';
+            if (parent) {
+              const lm = (parent.getElementsByTagNameNS ? parent.getElementsByTagNameNS('*', 'lastmod')[0] : null) || parent.querySelector('lastmod');
+              if (lm) lastmod = (lm.textContent || '').trim();
+              const cf = (parent.getElementsByTagNameNS ? parent.getElementsByTagNameNS('*', 'changefreq')[0] : null) || parent.querySelector('changefreq');
+              if (cf) changefreq = (cf.textContent || '').trim();
+              const pr = (parent.getElementsByTagNameNS ? parent.getElementsByTagNameNS('*', 'priority')[0] : null) || parent.querySelector('priority');
+              if (pr) priority = (pr.textContent || '').trim();
+            }
+            urls.push({
+              url: text,
+              lastmod,
+              changefreq,
+              priority,
+              source: isIndex ? 'Sitemap Index Entry' : 'Active XML Page'
+            });
+          }
+        });
+      }
+
+      // 2. High-speed Fallback: If DOM query found nothing (e.g. Chrome XML viewer wrapper), serialize XML to string and regex match
+      if (urls.length === 0) {
+        let xmlStr = '';
+        try {
+          xmlStr = new XMLSerializer().serializeToString(document);
+        } catch (_) {
+          xmlStr = document.documentElement ? document.documentElement.outerHTML : '';
         }
-      });
+        if (!xmlStr && document.body) {
+          xmlStr = document.body.innerText || document.body.textContent || '';
+        }
+
+        if (xmlStr && (xmlStr.includes('<loc>') || xmlStr.includes('&lt;loc&gt;') || xmlStr.includes('http'))) {
+          const locRegex = /(?:<loc>|&lt;loc&gt;)\s*(?:<!\[CDATA\[)?\s*([^<>&\s]+)\s*(?:\]\]>)?\s*(?:<\/loc>|&lt;\/loc&gt;)/gi;
+          let m;
+          const seen = new Set();
+          while ((m = locRegex.exec(xmlStr)) !== null) {
+            const u = m[1].trim();
+            if ((u.startsWith('http://') || u.startsWith('https://')) && !seen.has(u)) {
+              seen.add(u);
+              urls.push({
+                url: u,
+                lastmod: '',
+                changefreq: '',
+                priority: '',
+                source: isIndex ? 'Sitemap Index Entry' : 'Active XML Page'
+              });
+            }
+          }
+        }
+      }
 
       if (urls.length > 0) {
         return {
@@ -1027,8 +1239,7 @@
     if ((hasTitle && (hasImage || hasDesc || hasLink)) || (hasImage && (hasDesc || hasLink))) {
       let cardId = el.getAttribute('data-omni-card-id');
       if (!cardId) {
-        cardId = 'omni_card_' + (cardIdCounter++);
-        window.__omniCardIdCounter = cardIdCounter;
+        cardId = getNextCardId();
         el.setAttribute('data-omni-card-id', cardId);
       }
 
@@ -1169,8 +1380,7 @@
 
         let tableId = tableEl.getAttribute('data-omni-table-id');
         if (!tableId) {
-          tableId = 'omni_table_' + (tableIdCounter++);
-          window.__omniTableIdCounter = tableIdCounter;
+          tableId = getNextTableId();
           tableEl.setAttribute('data-omni-table-id', tableId);
         }
 
@@ -1407,7 +1617,7 @@
       <span>🎯 Hover & Click any card or container to extract it!</span>
       <button id="__omni_picker_cancel" style="background:#f43f5e; color:#fff; border:none; border-radius:15px; padding:4px 12px; cursor:pointer; font-weight:700; font-size:11px;">Cancel (Esc)</button>
     `;
-    document.body.appendChild(bar);
+    (document.body || document.documentElement).appendChild(bar);
 
     document.getElementById('__omni_picker_cancel')?.addEventListener('click', stopInteractivePicker);
 
@@ -1550,7 +1760,7 @@
       animation: __omni_bounce 0.3s ease;
     `;
     toast.textContent = `🎉 Captured ${count || 1} card(s)! Reopen OmniExtract popup to view all.`;
-    document.body.appendChild(toast);
+    (document.body || document.documentElement).appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
   }
 
@@ -1609,7 +1819,7 @@
     autoScrollState.isActive = true;
     autoScrollState.scrollCount = 0;
     autoScrollState.maxScrolls = maxScrolls;
-    autoScrollState.lastHeight = document.body.scrollHeight;
+    autoScrollState.lastHeight = (document.body || document.documentElement).scrollHeight;
 
     createFloatingBadge();
 
@@ -1627,7 +1837,7 @@
 
       // Check if end of page reached or max scrolls reached
       const currentScroll = window.scrollY + window.innerHeight;
-      const totalHeight = document.body.scrollHeight;
+      const totalHeight = (document.body || document.documentElement).scrollHeight;
 
       if (autoScrollState.scrollCount >= autoScrollState.maxScrolls || 
           (currentScroll >= totalHeight - 20 && totalHeight === autoScrollState.lastHeight)) {
@@ -1703,7 +1913,7 @@
       <span id="__omni_badge_text">Harvesting Dynamic Feed... (${store.images.size} imgs)</span>
       <button id="__omni_stop_btn" style="background:#f43f5e;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:700;font-size:11px;">Stop</button>
     `;
-    document.body.appendChild(badge);
+    (document.body || document.documentElement).appendChild(badge);
     autoScrollState.floatingBadge = badge;
 
     document.getElementById('__omni_stop_btn')?.addEventListener('click', stopAutoScroll);

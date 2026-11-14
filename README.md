@@ -76,7 +76,46 @@ Automatically scans page DOM, scripts, resource tags, and inline JavaScript code
 - Formatted raw JSON tree viewer with 1-click copy.
 - Comprehensive CSV / JSON / TXT exports.
 
+### 12. 🎯 Visual Point & Pick Element Harvester (Crosshair Picker)
+- Click the **🎯 Point & Pick** button in the header or Overview Quick Actions deck.
+- Hover over any element on the page to see an interactive luminous highlight with tag name, CSS class, and dimensions.
+- Click to extract exact text content, nested images, links, outer HTML, and unique CSS selector path with instant 1-click clipboard copy and toast notification.
+- Press `Escape` anytime to cancel.
+
+### 13. ⚡ Single Page Application (SPA) & Framework State Inspector
+- Automatically discovers and extracts raw backend JSON state payloads embedded in modern SPAs:
+  - **Next.js**: `<script id="__NEXT_DATA__">` (full server-side props, product lists, user profiles, routing state).
+  - **Nuxt.js**: `__NUXT_DATA__` raw state arrays and hydration stores.
+  - **Shopify**: `window.Shopify` and `window.ShopifyAnalytics` configuration objects.
+- 1-Click **"Copy Raw JSON"** and **"Download state.json"** (bypasses noisy DOM scraping entirely!).
+
+### 14. 🛡️ Security & Leaked API Keys Scanner
+- Proactively scans page scripts, inline config objects, and environment bundles for accidentally exposed secrets:
+  - **AWS Access Keys** (`AKIA...`)
+  - **Google Cloud & Firebase API Keys** (`AIza...`)
+  - **GitHub Personal Access Tokens** (`ghp_...`, `github_pat_...`)
+  - **Stripe Public & Secret Keys** (`pk_live_...`, `sk_live_...`)
+  - **Slack Bot & Webhook Tokens** (`xoxb-...`, `xoxp-...`)
+  - **JSON Web Tokens (JWT) / Bearer Tokens** (`eyJ...`)
+- Categorized by severity (`CRITICAL`, `WARNING`) in the Cloud & APIs tab with 1-click credential copying for bug bounty hunters and devsecops audits.
+
+### 15. 📈 SEO Health Scorecard & Technical Audit
+- Real-time 0-100 SEO health score with color-coded grade badges (Excellent, Good, Fair, Needs Work).
+- Comprehensive automated checklist:
+  - Title length optimization (ideal: 30-60 characters)
+  - Meta description presence & length (ideal: 120-160 characters)
+  - Canonical URL configuration
+  - OpenGraph social sharing completeness (`og:title`, `og:image`, `og:description`)
+  - H1 heading tag structure and hierarchy
+
+### 16. ⌨️ Zero-Scroll Two-Row Command Deck with Instant Hotkeys
+- Redesigned 10-tab command deck arranged in a compact 2-row layout (5 tabs per row) with zero horizontal scrolling:
+  - **Row 1**: Overview, Images, Media, Cards, Tables
+  - **Row 2**: Leads, Cloud & APIs, Links, Sitemap, Spider
+- **Hotkeys**: Press `Alt+1` through `Alt+0` (or `Alt+9` for Sitemap) to jump directly to any tab instantly, or use `Left`/`Right` arrow keys to cycle tabs seamlessly.
+
 ---
+
 
 ## 📦 How to Install in Google Chrome
 

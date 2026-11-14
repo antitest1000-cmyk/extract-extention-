@@ -57,6 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
     statSitemapCount: document.getElementById('statSitemapCount'),
     seoMetadataTable: document.getElementById('seoMetadataTable'),
     cloudSummaryList: document.getElementById('cloudSummaryList'),
+    viewerSeoScoreBadge: document.getElementById('viewerSeoScoreBadge'),
+    viewerSeoChecklist: document.getElementById('viewerSeoChecklist'),
+    viewerSpaCard: document.getElementById('viewerSpaCard'),
+    viewerSpaTitle: document.getElementById('viewerSpaTitle'),
+    viewerSpaSize: document.getElementById('viewerSpaSize'),
+    btnViewerCopySpa: document.getElementById('btnViewerCopySpa'),
+    btnViewerDownloadSpa: document.getElementById('btnViewerDownloadSpa'),
+    viewerSecretsCard: document.getElementById('viewerSecretsCard'),
+    viewerSecretsCount: document.getElementById('viewerSecretsCount'),
+    viewerSecretsList: document.getElementById('viewerSecretsList'),
 
     // Images View
     viewerImageFilter: document.getElementById('viewerImageFilter'),
@@ -141,8 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.statCloudCount.textContent = cloudCount;
     elements.statLinksCount.textContent = linksCount;
 
-    // Overview Metadata
+    // Overview Metadata, SEO Audit, SPA State, & Secrets
     renderOverviewMetadata(data);
+    renderViewerSeoAudit(data.seoAudit);
+    renderViewerSpaState(data.frameworkState);
+    renderViewerSecrets(data.frameworkState?.secrets);
     renderCloudSummary(data);
 
     // Other Tabs
@@ -159,6 +172,81 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.origin) {
       elements.viewerSitemapInput.value = `${data.origin}/sitemap.xml`;
     }
+  }
+
+  function renderViewerSeoAudit(audit) {
+    if (!elements.viewerSeoScoreBadge) return;
+    if (!audit) {
+      elements.viewerSeoScoreBadge.textContent = 'N/A';
+      return;
+    }
+    const score = audit.score || 0;
+    elements.viewerSeoScoreBadge.textContent = `${score} / 100`;
+    if (score >= 90) {
+      elements.viewerSeoScoreBadge.style.color = '#34d399';
+      elements.viewerSeoScoreBadge.style.background = 'rgba(16,185,129,0.2)';
+    } else if (score >= 70) {
+      elements.viewerSeoScoreBadge.style.color = '#38bdf8';
+      elements.viewerSeoScoreBadge.style.background = 'rgba(56,189,248,0.2)';
+    } else if (score >= 50) {
+      elements.viewerSeoScoreBadge.style.color = '#f59e0b';
+      elements.viewerSeoScoreBadge.style.background = 'rgba(245,158,11,0.2)';
+    } else {
+      elements.viewerSeoScoreBadge.style.color = '#f43f5e';
+      elements.viewerSeoScoreBadge.style.background = 'rgba(244,63,94,0.2)';
+    }
+
+    if (elements.viewerSeoChecklist && audit.checks) {
+      elements.viewerSeoChecklist.innerHTML = audit.checks.map(c => `
+        <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px; border-left: 3px solid ${c.passed ? '#10b981' : '#f43f5e'};">
+          <span style="font-weight: 700; color: ${c.passed ? '#34d399' : '#f43f5e'};">${c.passed ? '✓' : '✗'}</span>
+          <div>
+            <div style="font-weight: 600; color: var(--text-main);">${escapeHtml(c.name)}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(c.message)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function renderViewerSpaState(stateData) {
+    if (!elements.viewerSpaCard) return;
+    if (!stateData || !stateData.rawState) {
+      elements.viewerSpaCard.style.display = 'none';
+      return;
+    }
+    elements.viewerSpaCard.style.display = 'block';
+    const typeLabel = stateData.rawStateType === 'next' ? 'Next.js (__NEXT_DATA__)' :
+                      stateData.rawStateType === 'nuxt' ? 'Nuxt.js (__NUXT_DATA__)' : 'SPA State';
+    elements.viewerSpaTitle.textContent = typeLabel;
+    elements.viewerSpaSize.textContent = `${(stateData.stateSize / 1024).toFixed(1)} KB`;
+
+    elements.btnViewerCopySpa.onclick = () => {
+      copyToClipboard(JSON.stringify(stateData.rawState, null, 2));
+      showToast('Copied raw SPA JSON state to clipboard!');
+    };
+    elements.btnViewerDownloadSpa.onclick = () => {
+      downloadFile(JSON.stringify(stateData.rawState, null, 2), `${state.data.domain || 'spa'}-state.json`, 'application/json');
+    };
+  }
+
+  function renderViewerSecrets(secrets) {
+    if (!elements.viewerSecretsCard) return;
+    if (!secrets || secrets.length === 0) {
+      elements.viewerSecretsCard.style.display = 'none';
+      return;
+    }
+    elements.viewerSecretsCard.style.display = 'block';
+    elements.viewerSecretsCount.textContent = `${secrets.length} Alert(s)`;
+    elements.viewerSecretsList.innerHTML = secrets.map(s => `
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); padding: 6px 10px; border-radius: 6px;">
+        <div>
+          <span style="font-weight: 700; color: #f43f5e; text-transform: uppercase;">[${escapeHtml(s.severity)}] ${escapeHtml(s.type)}:</span>
+          <span style="color: var(--text-main); font-family: monospace; margin-left: 6px;">${escapeHtml(s.preview)}</span>
+        </div>
+        <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 8px;" onclick="navigator.clipboard.writeText('${escapeHtml(s.fullValue)}'); showToast('Copied credential!');">Copy</button>
+      </div>
+    `).join('');
   }
 
   function renderOverviewMetadata(data) {

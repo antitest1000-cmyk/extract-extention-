@@ -91,7 +91,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * =========================================================================
  */
 async function handleSitemapExtraction(targetUrl, customSitemapUrl) {
-  const urlObj = new URL(targetUrl);
+  let urlObj;
+  try {
+    urlObj = new URL(targetUrl);
+  } catch (e) {
+    urlObj = new URL('https://' + targetUrl.replace(/^https?:\/\//, ''));
+  }
   const origin = urlObj.origin;
   const alternateOrigin = origin.includes('://www.') 
     ? origin.replace('://www.', '://') 
@@ -101,49 +106,65 @@ async function handleSitemapExtraction(targetUrl, customSitemapUrl) {
   const allUrls = new Map();
   const candidateUrls = [];
 
-  // 1. If user provided a specific sitemap URL, prioritize it first
+  // 1. If user provided a specific sitemap URL or active URL is already an XML sitemap, prioritize it immediately
   if (customSitemapUrl && customSitemapUrl.trim()) {
     candidateUrls.push(customSitemapUrl.trim());
   }
-
-  // 2. If targetUrl itself is an XML sitemap, prioritize it
-  if (targetUrl && (targetUrl.endsWith('.xml') || targetUrl.includes('sitemap'))) {
+  if (targetUrl && (targetUrl.endsWith('.xml') || targetUrl.includes('sitemap') || targetUrl.includes('.xml?'))) {
     if (!candidateUrls.includes(targetUrl)) candidateUrls.push(targetUrl);
   }
 
-  // 3. Check robots.txt on origin and alternate origin
-  for (const org of [origin, alternateOrigin]) {
+  // Helper with strict timeout
+  async function fetchWithTimeout(url, ms = 3000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
     try {
-      const robotsUrl = `${org}/robots.txt`;
-      const robotsRes = await fetch(robotsUrl, { cache: 'no-cache' });
-      if (robotsRes.ok) {
-        const robotsTxt = await robotsRes.text();
-        const sitemapMatches = robotsTxt.matchAll(/^[ \t]*Sitemap:[ \t]*([^\r\n]+)/gmi);
-        for (const m of sitemapMatches) {
-          const smUrl = m[1].trim();
-          if (smUrl && !candidateUrls.includes(smUrl)) {
-            candidateUrls.push(smUrl);
-          }
-        }
-      }
-    } catch (e) {}
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/xml, text/xml, text/plain, */*' },
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      return null;
+    }
   }
 
-  // 4. Standard sitemap paths to probe
-  const standardPaths = [
-    '/sitemap.xml',
-    '/sitemap_index.xml',
-    '/sitemap-index.xml',
-    '/wp-sitemap.xml',
-    '/sitemap/sitemap.xml'
-  ];
+  // If no direct sitemap was provided, query robots.txt & probe standard paths
+  if (candidateUrls.length === 0) {
+    for (const org of [origin, alternateOrigin]) {
+      try {
+        const robotsUrl = `${org}/robots.txt`;
+        const robotsRes = await fetchWithTimeout(robotsUrl, 2500);
+        if (robotsRes && robotsRes.ok) {
+          const robotsTxt = await robotsRes.text();
+          const sitemapMatches = robotsTxt.matchAll(/^[ \t]*Sitemap:[ \t]*([^\r\n]+)/gmi);
+          for (const m of sitemapMatches) {
+            const smUrl = m[1].trim();
+            if (smUrl && !candidateUrls.includes(smUrl)) {
+              candidateUrls.push(smUrl);
+            }
+          }
+        }
+      } catch (e) {}
+    }
 
-  [origin, alternateOrigin].forEach(org => {
-    standardPaths.forEach(p => {
-      const full = `${org}${p}`;
-      if (!candidateUrls.includes(full)) candidateUrls.push(full);
+    const standardPaths = [
+      '/sitemap.xml',
+      '/sitemap_index.xml',
+      '/sitemap-index.xml',
+      '/wp-sitemap.xml',
+      '/sitemap/sitemap.xml'
+    ];
+
+    [origin, alternateOrigin].forEach(org => {
+      standardPaths.forEach(p => {
+        const full = `${org}${p}`;
+        if (!candidateUrls.includes(full)) candidateUrls.push(full);
+      });
     });
-  });
+  }
 
   const visitedSitemaps = new Set();
   const queue = [...candidateUrls];
@@ -238,7 +259,7 @@ async function handleSitemapExtraction(targetUrl, customSitemapUrl) {
  */
 function extractSitemapIndexUrlsFast(xml) {
   const list = [];
-  const locRegex = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
+  const locRegex = /<loc>\s*(?:<!\[CDATA\[)?\s*([^<>\]\s]+)\s*(?:\]\]>)?\s*<\/loc>/gi;
   let match;
   while ((match = locRegex.exec(xml)) !== null) {
     const u = match[1].trim();
@@ -254,7 +275,7 @@ function extractSitemapIndexUrlsFast(xml) {
  */
 function parseSitemapUrlsFast(xml, sourceFile) {
   const results = [];
-  const locRegex = /<loc>\s*([^<\s]+)\s*<\/loc>/gi;
+  const locRegex = /<loc>\s*(?:<!\[CDATA\[)?\s*([^<>\]\s]+)\s*(?:\]\]>)?\s*<\/loc>/gi;
   let match;
   while ((match = locRegex.exec(xml)) !== null) {
     const url = match[1].trim();

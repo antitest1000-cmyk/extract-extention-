@@ -64,6 +64,24 @@ document.addEventListener('DOMContentLoaded', () => {
     aiSnippetPreview: document.getElementById('aiSnippetPreview'),
     btnCopyMarkdownAi: document.getElementById('btnCopyMarkdownAi'),
     btnDownloadMarkdownAi: document.getElementById('btnDownloadMarkdownAi'),
+    btnQuickPick: document.getElementById('btnQuickPick'),
+    btnQuickAutoScroll: document.getElementById('btnQuickAutoScroll'),
+    btnQuickCopyAi: document.getElementById('btnQuickCopyAi'),
+    btnQuickViewer: document.getElementById('btnQuickViewer'),
+    seoAuditCard: document.getElementById('seoAuditCard'),
+    seoScoreVal: document.getElementById('seoScoreVal'),
+    lblSeoScoreBadge: document.getElementById('lblSeoScoreBadge'),
+    seoChecklistContainer: document.getElementById('seoChecklistContainer'),
+    spaStateCard: document.getElementById('spaStateCard'),
+    spaStateTitle: document.getElementById('spaStateTitle'),
+    spaStateSize: document.getElementById('spaStateSize'),
+    btnCopySpaJson: document.getElementById('btnCopySpaJson'),
+    btnDownloadSpaJson: document.getElementById('btnDownloadSpaJson'),
+    secretsScannerCard: document.getElementById('secretsScannerCard'),
+    lblSecretsCount: document.getElementById('lblSecretsCount'),
+    secretsListContainer: document.getElementById('secretsListContainer'),
+    pillSecretsFilter: document.getElementById('pillSecretsFilter'),
+    pillSecretsCount: document.getElementById('pillSecretsCount'),
     tablesCountLabel: document.getElementById('tablesCountLabel'),
     btnCopyAllTablesMd: document.getElementById('btnCopyAllTablesMd'),
     btnExportAllTablesCsv: document.getElementById('btnExportAllTablesCsv'),
@@ -273,6 +291,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // SEO Health Audit
+    renderSeoAudit(data.seoAudit);
+
+    // Framework State & Secrets
+    renderFrameworkState(data.frameworkState);
+    renderSecrets(data.frameworkState?.secrets);
+
     // Color Palette & Fonts
     renderDesignAssets(data.designAssets);
 
@@ -321,6 +346,108 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLinksTab();
   }
 
+
+  function renderSeoAudit(audit) {
+    if (!audit || !elements.seoAuditCard) return;
+
+    if (elements.seoScoreVal) {
+      elements.seoScoreVal.textContent = audit.score;
+    }
+
+    if (elements.lblSeoScoreBadge) {
+      if (audit.score >= 85) {
+        elements.lblSeoScoreBadge.style.color = '#34d399';
+        elements.lblSeoScoreBadge.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+        elements.lblSeoScoreBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+      } else if (audit.score >= 60) {
+        elements.lblSeoScoreBadge.style.color = '#fbbf24';
+        elements.lblSeoScoreBadge.style.borderColor = 'rgba(245, 158, 11, 0.5)';
+        elements.lblSeoScoreBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+      } else {
+        elements.lblSeoScoreBadge.style.color = '#f43f5e';
+        elements.lblSeoScoreBadge.style.borderColor = 'rgba(244, 63, 94, 0.5)';
+        elements.lblSeoScoreBadge.style.background = 'rgba(244, 63, 94, 0.15)';
+      }
+    }
+
+    if (elements.seoChecklistContainer && audit.checks) {
+      elements.seoChecklistContainer.innerHTML = audit.checks.map(c => {
+        const icon = c.status === 'pass' ? '✓' : (c.status === 'warn' ? '!' : '✕');
+        return `
+          <div class="seo-check-item">
+            <div class="seo-check-left">
+              <span class="seo-check-icon ${c.status}">${icon}</span>
+              <span class="seo-check-name">${escapeHtml(c.name)}</span>
+            </div>
+            <span class="seo-check-msg">${escapeHtml(c.message)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  function renderFrameworkState(frameworkState) {
+    if (!elements.spaStateCard) return;
+
+    if (frameworkState && frameworkState.rawState) {
+      elements.spaStateCard.style.display = 'block';
+      const sizeKb = Math.round(frameworkState.stateSize / 1024) || 1;
+      if (elements.spaStateTitle) {
+        elements.spaStateTitle.textContent = `${frameworkState.rawStateType || 'SPA State Payload'}`;
+      }
+      if (elements.spaStateSize) {
+        elements.spaStateSize.textContent = `${sizeKb} KB JSON state detected • Full props payload`;
+      }
+
+      elements.btnCopySpaJson.onclick = () => {
+        copyToClipboard(JSON.stringify(frameworkState.rawState, null, 2));
+        showToast('📋 Copied full SPA State JSON to clipboard!');
+      };
+
+      elements.btnDownloadSpaJson.onclick = () => {
+        downloadFile(JSON.stringify(frameworkState.rawState, null, 2), `${state.domain}-state.json`, 'application/json');
+      };
+    } else {
+      elements.spaStateCard.style.display = 'none';
+    }
+  }
+
+  function renderSecrets(secrets) {
+    if (!elements.secretsScannerCard) return;
+
+    if (secrets && secrets.length > 0) {
+      elements.secretsScannerCard.style.display = 'block';
+      if (elements.lblSecretsCount) elements.lblSecretsCount.textContent = `${secrets.length} Keys Found`;
+      if (elements.pillSecretsFilter) {
+        elements.pillSecretsFilter.style.display = 'inline-block';
+        if (elements.pillSecretsCount) elements.pillSecretsCount.textContent = secrets.length;
+      }
+
+      if (elements.secretsListContainer) {
+        elements.secretsListContainer.innerHTML = secrets.map(s => `
+          <div class="secret-item-row">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="${s.severity === 'critical' ? 'secret-badge-crit' : 'secret-badge-warn'}">${s.type}</span>
+              <span style="color: #cbd5e1;">${escapeHtml(s.masked)}</span>
+            </div>
+            <button class="btn-copy-secret" data-raw="${escapeHtml(s.raw)}">Copy</button>
+          </div>
+        `).join('');
+
+        elements.secretsListContainer.querySelectorAll('.btn-copy-secret').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyToClipboard(btn.dataset.raw);
+            showToast('Copied API key / credential to clipboard!');
+          });
+        });
+      }
+    } else {
+      elements.secretsScannerCard.style.display = 'none';
+      if (elements.pillSecretsFilter) elements.pillSecretsFilter.style.display = 'none';
+    }
+  }
+
   function renderDesignAssets(assets) {
     if (!assets) return;
 
@@ -359,9 +486,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let items = state.pageData.images;
 
-    // Apply format filter
+    // Apply format or dimension filter
     if (state.imageFormatFilter !== 'all') {
-      items = items.filter(img => img.format === state.imageFormatFilter);
+      if (state.imageFormatFilter === 'highres') {
+        items = items.filter(img => (img.width >= 1000 || img.height >= 800));
+      } else if (state.imageFormatFilter === 'icons') {
+        items = items.filter(img => (img.width > 0 && img.width <= 120 && img.height <= 120));
+      } else {
+        items = items.filter(img => img.format === state.imageFormatFilter);
+      }
     }
 
     // Apply search query
@@ -1144,6 +1277,26 @@ document.addEventListener('DOMContentLoaded', () => {
       customUrl = state.activeUrl;
       elements.inputCustomSitemap.value = customUrl;
     }
+
+    // Instant local extraction if already on an XML sitemap page
+    if ((!customUrl || customUrl === state.activeUrl) && state.pageData && state.pageData.inPageSitemap && state.pageData.inPageSitemap.count > 0) {
+      const inPage = state.pageData.inPageSitemap;
+      state.sitemapData = {
+        origin: state.domain,
+        discoveredSources: [inPage.sourceUrl],
+        totalUrls: inPage.count,
+        urls: inPage.urls
+      };
+      elements.sitemapStatusRow.querySelector('.status-indicator').classList.remove('loading');
+      elements.btnFetchSitemap.disabled = false;
+      elements.badgeSitemap.textContent = inPage.count;
+      elements.sitemapStatusText.textContent = `Extracted ${inPage.count} URLs directly from this XML page!`;
+      elements.sitemapMetaBar.style.display = 'flex';
+      elements.sitemapCount.textContent = `${inPage.count.toLocaleString()} URLs Found`;
+      renderSitemapUrls(inPage.urls);
+      return;
+    }
+
     const targetUrl = customUrl || state.activeUrl || `https://${state.domain}/`;
 
     elements.sitemapStatusText.textContent = 'Discovering and extracting sitemaps...';
@@ -1444,6 +1597,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+
+    // Quick Actions
+    elements.btnQuickPick?.addEventListener('click', () => {
+      elements.btnPickContainer?.click();
+    });
+
+    elements.btnQuickAutoScroll?.addEventListener('click', () => {
+      const imgTab = document.querySelector('.tab-btn[data-tab="tab-images"]');
+      if (imgTab) imgTab.click();
+      setTimeout(toggleAutoScroll, 200);
+    });
+
+    elements.btnQuickCopyAi?.addEventListener('click', () => {
+      elements.btnCopyMarkdownAi?.click();
+    });
+
+    elements.btnQuickViewer?.addEventListener('click', () => {
+      elements.btnOpenViewer?.click();
+    });
 
     // Open Viewer
     elements.btnOpenViewer.addEventListener('click', () => openInViewer(state.pageData));

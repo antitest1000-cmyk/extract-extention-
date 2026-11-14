@@ -28,6 +28,15 @@
         </div>
       </div>
       <div class="header-actions">
+        <button id="btnPickContainer" class="icon-btn" title="Point & Pick Element / Container from Live Page">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="22" x2="18" y1="12" y2="12"/>
+            <line x1="6" x2="2" y1="12" y2="12"/>
+            <line x1="12" x2="12" y1="6" y2="2"/>
+            <line x1="12" x2="12" y1="22" y2="18"/>
+          </svg>
+        </button>
         <button id="btnRefresh" class="icon-btn" title="Re-extract Active Page">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
@@ -143,6 +152,54 @@
 
       <!-- TAB 1: OVERVIEW & SEO -->
       <section id="tab-overview" class="tab-pane active">
+        <!-- Quick Action Deck -->
+        <div class="quick-action-deck">
+          <button class="quick-action-card" id="btnQuickPick">
+            <span class="quick-icon">🎯</span>
+            <div class="quick-text">
+              <strong>Point & Pick</strong>
+              <small>Click to Inspect</small>
+            </div>
+          </button>
+          <button class="quick-action-card" id="btnQuickAutoScroll">
+            <span class="quick-icon">⚡</span>
+            <div class="quick-text">
+              <strong>Auto-Scroll</strong>
+              <small>Harvest Feeds</small>
+            </div>
+          </button>
+          <button class="quick-action-card" id="btnQuickCopyAi">
+            <span class="quick-icon">🤖</span>
+            <div class="quick-text">
+              <strong>Copy for AI</strong>
+              <small>Prompt Markdown</small>
+            </div>
+          </button>
+          <button class="quick-action-card" id="btnQuickViewer">
+            <span class="quick-icon">🖥️</span>
+            <div class="quick-text">
+              <strong>Pro Viewer</strong>
+              <small>Full Dashboard</small>
+            </div>
+          </button>
+        </div>
+
+        <!-- SEO Health Score & Audit -->
+        <div class="section-card seo-audit-card" id="seoAuditCard">
+          <div class="card-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 15px;">📈</span>
+              <h3>SEO Audit & Health Score</h3>
+            </div>
+            <div class="seo-score-badge" id="lblSeoScoreBadge">
+              <span id="seoScoreVal">100</span><small>/100</small>
+            </div>
+          </div>
+          <div class="seo-checklist" id="seoChecklistContainer">
+            <!-- Dynamic audit checks -->
+          </div>
+        </div>
+
         <div class="section-card">
           <div class="card-header">
             <h3>Page Metadata & SEO</h3>
@@ -232,6 +289,24 @@
           </div>
         </div>
 
+        <!-- Framework & SPA State Inspector -->
+        <div class="section-card spa-state-card" id="spaStateCard" style="display: none; border-color: rgba(96, 165, 250, 0.35);">
+          <div class="card-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 15px;">⚡</span>
+              <div>
+                <h3 id="spaStateTitle" style="color: #60a5fa;">Next.js Page Props (__NEXT_DATA__)</h3>
+                <span id="spaStateSize" style="font-size: 11px; color: var(--text-muted);">Raw backend JSON payload</span>
+              </div>
+            </div>
+            <span class="chip chip-blue" id="spaStateBadge">SPA Data</span>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button id="btnCopySpaJson" class="btn-xs btn-primary" style="flex: 1;">📋 Copy State JSON</button>
+            <button id="btnDownloadSpaJson" class="btn-xs btn-outline" style="border-color: #60a5fa; color: #60a5fa;">📥 Download State.json</button>
+          </div>
+        </div>
+
         <!-- Design Assets: Color Palette & Typography -->
         <div class="section-card" id="designAssetsCard">
           <div class="card-header">
@@ -286,6 +361,8 @@
         <div class="sub-filter-bar">
           <div class="filter-pills" id="imageFormatFilters">
             <button class="pill active" data-format="all">All</button>
+            <button class="pill" data-format="highres">High-Res (>1000px)</button>
+            <button class="pill" data-format="icons">Icons (<120px)</button>
             <button class="pill" data-format="JPG">JPG</button>
             <button class="pill" data-format="PNG">PNG</button>
             <button class="pill" data-format="WEBP">WEBP</button>
@@ -423,6 +500,7 @@
         <div class="sub-filter-bar">
           <div class="filter-pills" id="cloudProviderFilters">
             <button class="pill active" data-provider="all">All Providers</button>
+            <button class="pill" data-provider="secrets" id="pillSecretsFilter" style="display:none; color:#f43f5e; border-color: rgba(244,63,94,0.4);">🛡️ Secrets (<span id="pillSecretsCount">0</span>)</button>
             <button class="pill" data-provider="AWS">AWS</button>
             <button class="pill" data-provider="Google Cloud">GCP / Firebase</button>
             <button class="pill" data-provider="Microsoft Azure">Azure</button>
@@ -430,6 +508,24 @@
             <button class="pill" data-provider="GitHub">GitHub</button>
           </div>
         </div>
+
+        <!-- Security & Secrets Scanner -->
+        <div class="section-card secrets-card" id="secretsScannerCard" style="display: none; margin: 10px 10px 0 10px; border: 1px solid rgba(244, 63, 94, 0.4); background: linear-gradient(145deg, rgba(20, 29, 51, 0.95), rgba(244, 63, 94, 0.08));">
+          <div class="card-header" style="margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 15px;">🛡️</span>
+              <h3 style="color: #f43f5e; font-size: 12.5px;">Security & Leaked Keys Inspector</h3>
+            </div>
+            <span class="chip chip-rose" id="lblSecretsCount">0 Keys</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+            Scans page source and scripts for exposed API keys, private tokens, and credentials.
+          </p>
+          <div id="secretsListContainer" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Dynamic detected secrets -->
+          </div>
+        </div>
+
         <div class="list-container" id="cloudLinksList">
           <!-- Dynamic Cloud Rows -->
         </div>
