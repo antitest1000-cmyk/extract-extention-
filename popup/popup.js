@@ -1711,9 +1711,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupTabNavigation() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+    tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        tabButtons.forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
         btn.classList.add('active');
@@ -1726,6 +1727,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         refreshActiveTab();
       });
+    });
+
+    // Keyboard Shortcuts: Alt+1..9,0 or ArrowLeft / ArrowRight
+    document.addEventListener('keydown', (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+      const tabOrder = [
+        'tab-overview', 'tab-images', 'tab-media', 'tab-cards', 'tab-tables',
+        'tab-leads', 'tab-cloud', 'tab-links', 'tab-sitemap', 'tab-crawler'
+      ];
+
+      if (e.altKey && e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        const num = parseInt(e.key);
+        const targetId = num === 0 ? tabOrder[9] : tabOrder[num - 1];
+        const targetBtn = document.querySelector(`.tab-btn[data-tab="${targetId}"]`);
+        if (targetBtn) targetBtn.click();
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const activeIdx = tabOrder.indexOf(state.currentTab);
+        if (activeIdx !== -1) {
+          let nextIdx = e.key === 'ArrowRight' ? activeIdx + 1 : activeIdx - 1;
+          if (nextIdx >= tabOrder.length) nextIdx = 0;
+          if (nextIdx < 0) nextIdx = tabOrder.length - 1;
+          const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabOrder[nextIdx]}"]`);
+          if (targetBtn) targetBtn.click();
+        }
+      }
     });
   }
 

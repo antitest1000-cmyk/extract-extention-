@@ -56,14 +56,24 @@ body {
   padding: 0 24px;
 }
 
-/* 1. Header */
+/* 1. Header (Sticky & Always Accessible) */
 .header {
   max-width: 1040px;
-  margin: 20px auto 0;
-  padding: 16px 24px;
+  margin: 12px auto;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  top: 10px;
+  z-index: 1000;
+  background: rgba(247, 246, 240, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: var(--border-sketch);
+  border-radius: var(--radius-sketch-alt);
+  box-shadow: 4px 4px 0px var(--ink-black);
+  transition: all 0.2s ease;
 }
 
 .logo-group {
