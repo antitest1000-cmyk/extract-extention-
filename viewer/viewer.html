@@ -58,6 +58,38 @@
           <span class="count-pill" style="background: rgba(245,158,11,0.2); color: #f59e0b;" id="sideCountCards">0</span>
         </button>
 
+        <button class="nav-item" data-view="view-tables">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+          </svg>
+          <span>Data Tables</span>
+          <span class="count-pill" style="background: rgba(16,185,129,0.2); color: #34d399;" id="sideCountTables">0</span>
+        </button>
+
+        <button class="nav-item" data-view="view-leads">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Leads & Contacts</span>
+          <span class="count-pill" style="background: rgba(56,189,248,0.2); color: #38bdf8;" id="sideCountLeads">0</span>
+        </button>
+
+        <button class="nav-item" data-view="view-tables">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+          </svg>
+          <span>Data Tables</span>
+          <span class="count-pill" style="background: rgba(16,185,129,0.2); color: #34d399;" id="sideCountTables">0</span>
+        </button>
+
+        <button class="nav-item" data-view="view-leads">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Leads & Contacts</span>
+          <span class="count-pill" style="background: rgba(56,189,248,0.2); color: #38bdf8;" id="sideCountLeads">0</span>
+        </button>
+
         <button class="nav-item" data-view="view-cloud">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
@@ -235,6 +267,72 @@
           </div>
           <div class="cards-viewer-grid" id="viewerCardsGrid" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
             <!-- Dynamic Cards -->
+          </div>
+        </section>
+
+        <!-- DATA TABLES VIEW -->
+        <section id="view-tables" class="view-section">
+          <div class="section-toolbar">
+            <div class="filter-group">
+              <span id="viewerTablesCount" style="font-weight: 600; color: var(--text-primary); font-size: 13px;">0 Tables Discovered</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btnCopyAllViewerTablesMd" class="btn btn-secondary">Copy All Tables (Markdown)</button>
+              <button id="btnDownloadAllViewerTablesCsv" class="btn btn-primary">Export Tables (CSV)</button>
+            </div>
+          </div>
+          <div id="viewerTablesContainer" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
+            <!-- Dynamic Tables -->
+          </div>
+        </section>
+
+        <!-- LEADS & CONTACTS VIEW -->
+        <section id="view-leads" class="view-section">
+          <div class="section-toolbar">
+            <div class="filter-group">
+              <span id="viewerLeadsCount" style="font-weight: 600; color: var(--text-primary); font-size: 13px;">0 Contacts & Leads Found</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btnCopyAllViewerEmails" class="btn btn-secondary">Copy Emails</button>
+              <button id="btnCopyAllViewerPhones" class="btn btn-secondary">Copy Phones</button>
+              <button id="btnDownloadLeadsCsv" class="btn btn-primary">Export Leads (CSV)</button>
+            </div>
+          </div>
+          <div id="viewerLeadsContainer" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
+            <!-- Dynamic Leads -->
+          </div>
+        </section>
+
+        <!-- DATA TABLES VIEW -->
+        <section id="view-tables" class="view-section">
+          <div class="section-toolbar">
+            <div class="filter-group">
+              <span id="viewerTablesCount" style="font-weight: 600; color: var(--text-primary); font-size: 13px;">0 Tables Discovered</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btnCopyAllViewerTablesMd" class="btn btn-secondary">Copy All Tables (Markdown)</button>
+              <button id="btnDownloadAllViewerTablesCsv" class="btn btn-primary">Export Tables (CSV)</button>
+            </div>
+          </div>
+          <div id="viewerTablesContainer" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
+            <!-- Dynamic Tables -->
+          </div>
+        </section>
+
+        <!-- LEADS & CONTACTS VIEW -->
+        <section id="view-leads" class="view-section">
+          <div class="section-toolbar">
+            <div class="filter-group">
+              <span id="viewerLeadsCount" style="font-weight: 600; color: var(--text-primary); font-size: 13px;">0 Contacts & Leads Found</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btnCopyAllViewerEmails" class="btn btn-secondary">Copy Emails</button>
+              <button id="btnCopyAllViewerPhones" class="btn btn-secondary">Copy Phones</button>
+              <button id="btnDownloadLeadsCsv" class="btn btn-primary">Export Leads (CSV)</button>
+            </div>
+          </div>
+          <div id="viewerLeadsContainer" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
+            <!-- Dynamic Leads -->
           </div>
         </section>
 

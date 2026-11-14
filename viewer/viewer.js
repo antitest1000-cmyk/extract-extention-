@@ -27,6 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
     sideCountImages: document.getElementById('sideCountImages'),
     sideCountMedia: document.getElementById('sideCountMedia'),
     sideCountCards: document.getElementById('sideCountCards'),
+    sideCountTables: document.getElementById('sideCountTables'),
+    sideCountLeads: document.getElementById('sideCountLeads'),
+    viewerTablesCount: document.getElementById('viewerTablesCount'),
+    viewerTablesContainer: document.getElementById('viewerTablesContainer'),
+    viewerLeadsCount: document.getElementById('viewerLeadsCount'),
+    viewerLeadsContainer: document.getElementById('viewerLeadsContainer'),
+    btnCopyAllViewerTablesMd: document.getElementById('btnCopyAllViewerTablesMd'),
+    btnDownloadAllViewerTablesCsv: document.getElementById('btnDownloadAllViewerTablesCsv'),
+    btnCopyAllViewerEmails: document.getElementById('btnCopyAllViewerEmails'),
+    btnCopyAllViewerPhones: document.getElementById('btnCopyAllViewerPhones'),
+    btnDownloadLeadsCsv: document.getElementById('btnDownloadLeadsCsv'),
     sideCountCloud: document.getElementById('sideCountCloud'),
     sideCountSitemap: document.getElementById('sideCountSitemap'),
     sideCountLinks: document.getElementById('sideCountLinks'),
@@ -110,9 +121,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const cloudCount = (data.cloudLinks && data.cloudLinks.length) || 0;
     const linksCount = (data.links && data.links.length) || 0;
 
+    const tableCount = (data.tables && data.tables.length) || 0;
+    const emailCount = (data.contacts && data.contacts.emails && data.contacts.emails.length) || 0;
+    const phoneCount = (data.contacts && data.contacts.phones && data.contacts.phones.length) || 0;
+    const socialCount = (data.contacts && data.contacts.socials && data.contacts.socials.length) || 0;
+    const leadsTotal = emailCount + phoneCount + socialCount;
+
     elements.sideCountImages.textContent = imgCount;
     elements.sideCountMedia.textContent = mediaCount;
     if (elements.sideCountCards) elements.sideCountCards.textContent = cardCount;
+    if (elements.sideCountTables) elements.sideCountTables.textContent = tableCount;
+    if (elements.sideCountLeads) elements.sideCountLeads.textContent = leadsTotal;
     elements.sideCountCloud.textContent = cloudCount;
     elements.sideCountLinks.textContent = linksCount;
 
@@ -130,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderImagesGrid();
     renderMediaTable();
     renderCardsView();
+    renderTablesViewer();
+    renderLeadsViewer();
     renderCloudTable();
     renderLinksTable();
     renderJsonTree();
@@ -303,6 +324,132 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Structured Cards View
    */
+
+  function renderTablesViewer() {
+    if (!state.data) return;
+    const tables = state.data.tables || [];
+    if (elements.viewerTablesCount) elements.viewerTablesCount.textContent = `${tables.length} Tables Discovered`;
+
+    if (tables.length === 0) {
+      elements.viewerTablesContainer.innerHTML = '<div class="empty-state">No tables detected on page.</div>';
+      return;
+    }
+
+    elements.viewerTablesContainer.innerHTML = tables.map((tbl, idx) => {
+      const headerRowHtml = (tbl.headers && tbl.headers.length > 0)
+        ? `<tr>${tbl.headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`
+        : '';
+
+      const bodyRowsHtml = (tbl.rows || []).slice(0, 10).map(row => {
+        return `<tr>${row.map(cell => `<td title="${escapeHtml(cell)}">${escapeHtml(cell)}</td>`).join('')}</tr>`;
+      }).join('');
+
+      return `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">📊 ${escapeHtml(tbl.title)}</div>
+            <span style="font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(16,185,129,0.15); color: #34d399; font-weight: 600;">${tbl.rowCount} Rows × ${tbl.colCount} Cols</span>
+          </div>
+          <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; margin: 10px 0;">
+            <table class="data-table" style="font-size: 12px;">
+              <thead>${headerRowHtml}</thead>
+              <tbody>${bodyRowsHtml}</tbody>
+            </table>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+            <button class="btn btn-secondary btn-copy-tbl-md" data-idx="${idx}">Copy Markdown</button>
+            <button class="btn btn-secondary btn-copy-tbl-json" data-idx="${idx}">Copy JSON</button>
+            <button class="btn btn-primary btn-save-tbl-csv" data-idx="${idx}">Export CSV</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    elements.viewerTablesContainer.querySelectorAll('.btn-copy-tbl-md').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = tables[Number(btn.dataset.idx)];
+        if (t && t.markdown) { copyToClipboard(t.markdown); showToast('Copied Markdown table!'); }
+      });
+    });
+
+    elements.viewerTablesContainer.querySelectorAll('.btn-copy-tbl-json').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = tables[Number(btn.dataset.idx)];
+        if (t && t.json) { copyToClipboard(JSON.stringify(t.json, null, 2)); showToast('Copied JSON array!'); }
+      });
+    });
+
+    elements.viewerTablesContainer.querySelectorAll('.btn-save-tbl-csv').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = tables[Number(btn.dataset.idx)];
+        if (t && t.csv) downloadFile(t.csv, `${state.data.domain || 'extracted'}-table-${Number(btn.dataset.idx) + 1}.csv`, 'text/csv');
+      });
+    });
+  }
+
+  function renderLeadsViewer() {
+    if (!state.data) return;
+    const contacts = state.data.contacts || { emails: [], phones: [], socials: [] };
+    const emails = contacts.emails || [];
+    const phones = contacts.phones || [];
+    const socials = contacts.socials || [];
+    const forms = state.data.forms || [];
+
+    const total = emails.length + phones.length + socials.length;
+    if (elements.viewerLeadsCount) elements.viewerLeadsCount.textContent = `${total} Contacts & Leads (${emails.length} Emails • ${phones.length} Phones • ${socials.length} Socials)`;
+
+    let html = '';
+    if (emails.length > 0) {
+      html += `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+          <h3 style="font-size: 13px; color: var(--text-primary); margin-bottom: 10px;">✉️ Discovered Email Addresses (${emails.length})</h3>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${emails.map(e => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-secondary); border-radius: 6px;">
+                <span style="font-family: monospace; color: var(--text-primary);">${escapeHtml(e)}</span>
+                <a href="mailto:${escapeHtml(e)}" class="btn btn-secondary" style="padding: 3px 10px; font-size: 11px; text-decoration: none;">Send Email</a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (phones.length > 0) {
+      html += `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+          <h3 style="font-size: 13px; color: var(--text-primary); margin-bottom: 10px;">📞 Phone Numbers (${phones.length})</h3>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${phones.map(p => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-secondary); border-radius: 6px;">
+                <span style="font-family: monospace; color: var(--text-primary);">${escapeHtml(p)}</span>
+                <a href="tel:${escapeHtml(p)}" class="btn btn-secondary" style="padding: 3px 10px; font-size: 11px; text-decoration: none;">Call</a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (socials.length > 0) {
+      html += `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+          <h3 style="font-size: 13px; color: var(--text-primary); margin-bottom: 10px;">🌐 Social & Community Profiles (${socials.length})</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+            ${socials.map(s => `
+              <a href="${escapeHtml(s.url)}" target="_blank" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; text-decoration: none; color: var(--text-primary);">
+                <strong style="color: #38bdf8;">${escapeHtml(s.platform)}</strong>
+                <span style="font-size: 11px; color: var(--text-secondary);">↗ Visit</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    elements.viewerLeadsContainer.innerHTML = html || '<div class="empty-state">No contacts or leads detected.</div>';
+  }
+
   function renderCardsView() {
     if (!state.data || !state.data.cards) return;
     let items = state.data.cards;

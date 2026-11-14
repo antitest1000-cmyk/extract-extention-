@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     badgeImages: document.getElementById('badgeImages'),
     badgeMedia: document.getElementById('badgeMedia'),
     badgeCards: document.getElementById('badgeCards'),
+    badgeTables: document.getElementById('badgeTables'),
+    badgeLeads: document.getElementById('badgeLeads'),
     badgeCloud: document.getElementById('badgeCloud'),
     badgeLinks: document.getElementById('badgeLinks'),
     badgeSitemap: document.getElementById('badgeSitemap'),
@@ -52,7 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
     metaKeywords: document.getElementById('metaKeywords'),
     statWords: document.getElementById('statWords'),
     statCards: document.getElementById('statCards'),
+    statTables: document.getElementById('statTables'),
+    statLeads: document.getElementById('statLeads'),
     statImages: document.getElementById('statImages'),
+    btnCopyMarkdownAi: document.getElementById('btnCopyMarkdownAi'),
+    btnDownloadMarkdownAi: document.getElementById('btnDownloadMarkdownAi'),
+    tablesCountLabel: document.getElementById('tablesCountLabel'),
+    btnCopyAllTablesMd: document.getElementById('btnCopyAllTablesMd'),
+    btnExportAllTablesCsv: document.getElementById('btnExportAllTablesCsv'),
+    tablesListContainer: document.getElementById('tablesListContainer'),
+    leadsSummaryLabel: document.getElementById('leadsSummaryLabel'),
+    btnCopyAllEmails: document.getElementById('btnCopyAllEmails'),
+    btnCopyAllPhones: document.getElementById('btnCopyAllPhones'),
+    btnExportLeadsCsv: document.getElementById('btnExportLeadsCsv'),
+    leadsContainer: document.getElementById('leadsContainer'),
     statMedia: document.getElementById('statMedia'),
     statCloud: document.getElementById('statCloud'),
     paletteRow: document.getElementById('paletteRow'),
@@ -194,9 +209,17 @@ document.addEventListener('DOMContentLoaded', () => {
     state.pageData = data;
 
     // Badges
+    const tableCount = (data.tables && data.tables.length) || 0;
+    const emailCount = (data.contacts && data.contacts.emails && data.contacts.emails.length) || 0;
+    const phoneCount = (data.contacts && data.contacts.phones && data.contacts.phones.length) || 0;
+    const socialCount = (data.contacts && data.contacts.socials && data.contacts.socials.length) || 0;
+    const leadsTotal = emailCount + phoneCount + socialCount;
+
     elements.badgeImages.textContent = (data.images && data.images.length) || 0;
     elements.badgeMedia.textContent = (data.media && data.media.length) || 0;
     elements.badgeCards.textContent = (data.cards && data.cards.length) || 0;
+    if (elements.badgeTables) elements.badgeTables.textContent = tableCount;
+    if (elements.badgeLeads) elements.badgeLeads.textContent = leadsTotal;
     elements.badgeCloud.textContent = (data.cloudLinks && data.cloudLinks.length) || 0;
     elements.badgeLinks.textContent = (data.links && data.links.length) || 0;
 
@@ -226,6 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     elements.statWords.textContent = (data.stats.wordCount || 0).toLocaleString();
     elements.statCards.textContent = (data.cards && data.cards.length) || 0;
+    if (elements.statTables) elements.statTables.textContent = tableCount;
+    if (elements.statLeads) elements.statLeads.textContent = leadsTotal;
     elements.statImages.textContent = (data.images && data.images.length) || 0;
     elements.statMedia.textContent = (data.media && data.media.length) || 0;
     elements.statCloud.textContent = (data.cloudLinks && data.cloudLinks.length) || 0;
@@ -272,6 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderImagesTab();
     renderMediaTab();
     renderCardsTab();
+    renderTablesTab();
+    renderLeadsTab();
     renderCloudTab();
     renderLinksTab();
   }
@@ -681,6 +708,285 @@ document.addEventListener('DOMContentLoaded', () => {
       el.querySelector('.entity-title')?.addEventListener('click', () => {
         if (card.image) openLightbox(card.image, card.title);
       });
+    });
+  }
+
+
+  /**
+   * =========================================================================
+   * DATA TABLES TAB CONTROLLER
+   * =========================================================================
+   */
+  function renderTablesTab() {
+    if (!state.pageData) return;
+    const tables = state.pageData.tables || [];
+
+    if (elements.tablesCountLabel) {
+      elements.tablesCountLabel.textContent = `${tables.length} Table${tables.length === 1 ? '' : 's'} Discovered`;
+    }
+
+    if (tables.length === 0) {
+      elements.tablesListContainer.innerHTML = `
+        <div class="empty-state">
+          <p style="font-size: 13px; color: var(--text-primary);">No HTML tables found on this page.</p>
+          <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+            If data is in a repeating list or cards format, check the <strong>Cards</strong> tab!
+          </p>
+        </div>`;
+      return;
+    }
+
+    elements.tablesListContainer.innerHTML = tables.map((tbl, idx) => {
+      const headerRowHtml = (tbl.headers && tbl.headers.length > 0)
+        ? `<tr>${tbl.headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`
+        : '';
+
+      const bodyRowsHtml = (tbl.previewRows || []).map(row => {
+        return `<tr>${row.map(cell => `<td title="${escapeHtml(cell)}">${escapeHtml(cell)}</td>`).join('')}</tr>`;
+      }).join('');
+
+      return `
+        <div class="table-card-pro" data-table-id="${escapeHtml(tbl.id)}">
+          <div class="table-card-header">
+            <div class="table-title">
+              <span>📊</span>
+              <span>${escapeHtml(tbl.title)}</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span class="table-meta-badge">${tbl.rowCount} Rows × ${tbl.colCount} Cols</span>
+            </div>
+          </div>
+
+          <div class="table-preview-scroll">
+            <table class="omni-table">
+              <thead>${headerRowHtml}</thead>
+              <tbody>${bodyRowsHtml}</tbody>
+            </table>
+          </div>
+
+          <div class="table-actions-row">
+            <button class="btn-xs btn-outline btn-inspect-table" data-table-id="${escapeHtml(tbl.id)}" style="border-color: #10b981; color: #10b981;">
+              🎯 Inspect
+            </button>
+            <button class="btn-xs btn-outline btn-copy-table-md" data-idx="${idx}">
+              📝 Markdown
+            </button>
+            <button class="btn-xs btn-outline btn-copy-table-json" data-idx="${idx}">
+              📋 JSON
+            </button>
+            <button class="btn-xs btn-primary btn-download-table-csv" data-idx="${idx}">
+              📥 CSV
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Wire table card buttons
+    elements.tablesListContainer.querySelectorAll('.btn-inspect-table').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tableId = btn.dataset.tableId;
+        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+          if (tab && tab.id) {
+            chrome.tabs.sendMessage(tab.id, { action: 'HIGHLIGHT_TABLE', tableId });
+            showToast('Highlighted table on webpage!');
+          }
+        });
+      });
+    });
+
+    elements.tablesListContainer.querySelectorAll('.btn-copy-table-md').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tbl = tables[Number(btn.dataset.idx)];
+        if (tbl && tbl.markdown) {
+          copyToClipboard(tbl.markdown);
+          showToast(`Copied "${tbl.title}" as Markdown Table!`);
+        }
+      });
+    });
+
+    elements.tablesListContainer.querySelectorAll('.btn-copy-table-json').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tbl = tables[Number(btn.dataset.idx)];
+        if (tbl && tbl.json) {
+          copyToClipboard(JSON.stringify(tbl.json, null, 2));
+          showToast(`Copied "${tbl.title}" as JSON array!`);
+        }
+      });
+    });
+
+    elements.tablesListContainer.querySelectorAll('.btn-download-table-csv').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tbl = tables[Number(btn.dataset.idx)];
+        if (tbl && tbl.csv) {
+          const safeName = (tbl.title || 'table').toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+          downloadFile(tbl.csv, `${state.domain}-${safeName}.csv`, 'text/csv');
+        }
+      });
+    });
+  }
+
+  /**
+   * =========================================================================
+   * LEADS, CONTACTS & FORMS TAB CONTROLLER
+   * =========================================================================
+   */
+  function renderLeadsTab() {
+    if (!state.pageData) return;
+    const contacts = state.pageData.contacts || { emails: [], phones: [], socials: [] };
+    const emails = contacts.emails || [];
+    const phones = contacts.phones || [];
+    const socials = contacts.socials || [];
+    const forms = state.pageData.forms || [];
+
+    const totalCount = emails.length + phones.length + socials.length;
+    if (elements.leadsSummaryLabel) {
+      elements.leadsSummaryLabel.textContent = `${totalCount} Contacts & Leads (${emails.length} Emails • ${phones.length} Phones • ${socials.length} Socials)`;
+    }
+
+    if (totalCount === 0 && forms.length === 0) {
+      elements.leadsContainer.innerHTML = `
+        <div class="empty-state">
+          <p style="font-size: 13px; color: var(--text-primary);">No direct emails, phone numbers, or social profiles detected.</p>
+          <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+            Check the <strong>Links</strong> tab for all other outbound links.
+          </p>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+
+    // 1. Emails Section
+    if (emails.length > 0) {
+      html += `
+        <div class="leads-section">
+          <div class="leads-section-header">
+            <div class="leads-section-title">
+              <span>✉️</span>
+              <span>Discovered Emails (${emails.length})</span>
+            </div>
+            <button class="btn-xs btn-outline btn-copy-all-emails-mini" style="font-size: 10px; padding: 2px 7px;">Copy All</button>
+          </div>
+          <div class="leads-list">
+            ${emails.map(em => `
+              <div class="lead-item-row">
+                <span class="lead-val-text selectable">${escapeHtml(em)}</span>
+                <div style="display: flex; gap: 4px;">
+                  <button class="btn-xs btn-outline btn-copy-single-lead" data-val="${escapeHtml(em)}" style="padding: 2px 6px;">Copy</button>
+                  <a href="mailto:${escapeHtml(em)}" class="btn-xs btn-primary" style="padding: 2px 6px; text-decoration: none;">Email</a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 2. Phone Numbers Section
+    if (phones.length > 0) {
+      html += `
+        <div class="leads-section">
+          <div class="leads-section-header">
+            <div class="leads-section-title">
+              <span>📞</span>
+              <span>Phone Numbers (${phones.length})</span>
+            </div>
+            <button class="btn-xs btn-outline btn-copy-all-phones-mini" style="font-size: 10px; padding: 2px 7px;">Copy All</button>
+          </div>
+          <div class="leads-list">
+            ${phones.map(ph => `
+              <div class="lead-item-row">
+                <span class="lead-val-text selectable">${escapeHtml(ph)}</span>
+                <div style="display: flex; gap: 4px;">
+                  <button class="btn-xs btn-outline btn-copy-single-lead" data-val="${escapeHtml(ph)}" style="padding: 2px 6px;">Copy</button>
+                  <a href="tel:${escapeHtml(ph)}" class="btn-xs btn-primary" style="padding: 2px 6px; text-decoration: none;">Call</a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. Social Profiles Section
+    if (socials.length > 0) {
+      html += `
+        <div class="leads-section">
+          <div class="leads-section-header">
+            <div class="leads-section-title">
+              <span>🌐</span>
+              <span>Social & Community Profiles (${socials.length})</span>
+            </div>
+          </div>
+          <div class="social-grid-cards">
+            ${socials.map(soc => `
+              <a href="${escapeHtml(soc.url)}" target="_blank" class="social-pill-card" title="${escapeHtml(soc.url)}">
+                <span style="font-weight: 700; color: #38bdf8;">${escapeHtml(soc.platform)}</span>
+                <span class="chip chip-blue" style="font-size: 9px; padding: 1px 4px;">↗</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 4. Forms Section
+    if (forms.length > 0) {
+      html += `
+        <div class="leads-section">
+          <div class="leads-section-header">
+            <div class="leads-section-title">
+              <span>📋</span>
+              <span>Detected Forms & Action Endpoints (${forms.length})</span>
+            </div>
+          </div>
+          <div>
+            ${forms.map(frm => `
+              <div class="form-item-card">
+                <div class="form-meta-row">
+                  <strong>${escapeHtml(frm.name)}</strong>
+                  <span class="chip ${frm.method === 'POST' ? 'chip-blue' : 'chip-green'}">${frm.method}</span>
+                </div>
+                <div style="font-size: 11px; font-family: monospace; color: var(--accent-cyan); word-break: break-all; margin-bottom: 6px;">
+                  Action: ${escapeHtml(frm.action)}
+                </div>
+                <div class="form-fields-chips">
+                  ${frm.fields.map(f => `
+                    <span class="field-chip" title="${escapeHtml(f.type)}: ${escapeHtml(f.placeholder || f.value || '')}">
+                      ${escapeHtml(f.name)} (${escapeHtml(f.type)}${f.required ? '*' : ''})
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    elements.leadsContainer.innerHTML = html;
+
+    // Wire up lead buttons
+    elements.leadsContainer.querySelectorAll('.btn-copy-single-lead').forEach(btn => {
+      btn.addEventListener('click', () => {
+        copyToClipboard(btn.dataset.val);
+        showToast(`Copied: ${btn.dataset.val}`);
+      });
+    });
+
+    elements.leadsContainer.querySelector('.btn-copy-all-emails-mini')?.addEventListener('click', () => {
+      if (emails.length > 0) {
+        copyToClipboard(emails.join('\n'));
+        showToast(`Copied ${emails.length} emails!`);
+      }
+    });
+
+    elements.leadsContainer.querySelector('.btn-copy-all-phones-mini')?.addEventListener('click', () => {
+      if (phones.length > 0) {
+        copyToClipboard(phones.join('\n'));
+        showToast(`Copied ${phones.length} phones!`);
+      }
     });
   }
 
@@ -1288,6 +1594,63 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(`Copied ${state.pageData.cards.length} cards formatted as text!`);
     });
 
+
+    // AI Clean Markdown Export
+    elements.btnCopyMarkdownAi?.addEventListener('click', () => {
+      if (!state.pageData) return;
+      const md = state.pageData.cleanMarkdown || `# ${document.title}\n\n${state.activeUrl}`;
+      copyToClipboard(md);
+      showToast('Copied Clean Markdown ready for AI / LLMs!');
+    });
+
+    elements.btnDownloadMarkdownAi?.addEventListener('click', () => {
+      if (!state.pageData) return;
+      const md = state.pageData.cleanMarkdown || `# ${document.title}\n\n${state.activeUrl}`;
+      downloadFile(md, `${state.domain}-article.md`, 'text/markdown');
+    });
+
+    // Tables Tab Top Actions
+    elements.btnCopyAllTablesMd?.addEventListener('click', () => {
+      const tables = (state.pageData && state.pageData.tables) || [];
+      if (tables.length === 0) return;
+      const allMd = tables.map(t => `### ${t.title}\n\n${t.markdown}`).join('\n\n---\n\n');
+      copyToClipboard(allMd);
+      showToast(`Copied ${tables.length} tables as Markdown!`);
+    });
+
+    elements.btnExportAllTablesCsv?.addEventListener('click', () => {
+      const tables = (state.pageData && state.pageData.tables) || [];
+      if (tables.length === 0) return;
+      const first = tables[0];
+      downloadFile(first.csv, `${state.domain}-table-1.csv`, 'text/csv');
+    });
+
+    // Leads Tab Top Actions
+    elements.btnCopyAllEmails?.addEventListener('click', () => {
+      const emails = (state.pageData && state.pageData.contacts && state.pageData.contacts.emails) || [];
+      if (emails.length === 0) return;
+      copyToClipboard(emails.join('\n'));
+      showToast(`Copied ${emails.length} email addresses!`);
+    });
+
+    elements.btnCopyAllPhones?.addEventListener('click', () => {
+      const phones = (state.pageData && state.pageData.contacts && state.pageData.contacts.phones) || [];
+      if (phones.length === 0) return;
+      copyToClipboard(phones.join('\n'));
+      showToast(`Copied ${phones.length} phone numbers!`);
+    });
+
+    elements.btnExportLeadsCsv?.addEventListener('click', () => {
+      if (!state.pageData || !state.pageData.contacts) return;
+      const contacts = state.pageData.contacts;
+      let csv = 'Type,Value,Platform/Notes\n';
+      (contacts.emails || []).forEach(e => { csv += `"Email","${e}",""\n`; });
+      (contacts.phones || []).forEach(p => { csv += `"Phone","${p}",""\n`; });
+      (contacts.socials || []).forEach(s => { csv += `"Social","${s.url}","${s.platform}"\n`; });
+      (state.pageData.forms || []).forEach(f => { csv += `"Form","${f.action}","Method: ${f.method}, Fields: ${f.fieldCount}"\n`; });
+      downloadFile(csv, `${state.domain}-leads.csv`, 'text/csv');
+    });
+
     // Batch download images
     elements.btnDownloadSelectedImages.addEventListener('click', () => {
       if (!state.pageData || !state.pageData.images) return;
@@ -1332,6 +1695,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab === 'tab-images') renderImagesTab();
     else if (state.currentTab === 'tab-media') renderMediaTab();
     else if (state.currentTab === 'tab-cards') renderCardsTab();
+    else if (state.currentTab === 'tab-tables') renderTablesTab();
+    else if (state.currentTab === 'tab-leads') renderLeadsTab();
     else if (state.currentTab === 'tab-cloud') renderCloudTab();
     else if (state.currentTab === 'tab-links') renderLinksTab();
     else if (state.currentTab === 'tab-sitemap' && state.sitemapData) renderSitemapUrls(state.sitemapData.urls);
@@ -1345,6 +1710,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.currentTab === 'tab-images') dataToExport = state.pageData.images;
     else if (state.currentTab === 'tab-media') dataToExport = state.pageData.media;
     else if (state.currentTab === 'tab-cards') dataToExport = state.pageData.cards;
+    else if (state.currentTab === 'tab-tables') dataToExport = state.pageData.tables;
+    else if (state.currentTab === 'tab-leads') dataToExport = state.pageData.contacts;
     else if (state.currentTab === 'tab-cloud') dataToExport = state.pageData.cloudLinks;
     else if (state.currentTab === 'tab-links') dataToExport = state.pageData.links;
     else if (state.currentTab === 'tab-sitemap' && state.sitemapData) dataToExport = state.sitemapData.urls;

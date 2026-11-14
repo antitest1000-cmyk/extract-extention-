@@ -231,6 +231,9 @@
         <div class="mockup-tabs">
           <button class="m-tab active" data-target="m-images">🖼️ Images (42)</button>
           <button class="m-tab" data-target="m-cards">🗂️ Cards & Feeds (12)</button>
+          <button class="m-tab" data-target="m-tables">📊 Tables (3)</button>
+          <button class="m-tab" data-target="m-leads">📇 Leads & Contacts (18)</button>
+          <button class="m-tab" data-target="m-ai">🤖 AI Markdown</button>
           <button class="m-tab" data-target="m-media">🎬 Video & Audio (5)</button>
           <button class="m-tab" data-target="m-cloud">☁️ Cloud & APIs (16)</button>
           <button class="m-tab" data-target="m-sitemap">🗺️ Sitemap (XML)</button>
@@ -305,6 +308,119 @@
             </div>
             <div class="m-caption">
               ⚡ <em>Extracts Title, Image, Description, Price, and Link together in exact visual order!</em>
+            </div>
+          </div>
+
+          <!-- View: Tables -->
+          <div class="m-view" id="m-tables">
+            <div style="overflow-x: auto; border: 2px solid #000; border-radius: 6px; background: #fff; box-shadow: 2px 2px 0 #000;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--font-mono);">
+                <thead>
+                  <tr style="background: #f1f5f9; border-bottom: 2px solid #000; text-align: left;">
+                    <th style="padding: 8px 12px; border-right: 1px solid #cbd5e1;">Cloud Provider</th>
+                    <th style="padding: 8px 12px; border-right: 1px solid #cbd5e1;">Storage Tier</th>
+                    <th style="padding: 8px 12px; border-right: 1px solid #cbd5e1;">Price ($/TB/mo)</th>
+                    <th style="padding: 8px 12px;">SLA Availability</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 6px 12px; font-weight: 700; border-right: 1px solid #e2e8f0;">Amazon Web Services</td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;"><span class="sketch-pill pill-orange">S3 Standard</span></td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;">$23.00</td>
+                    <td style="padding: 6px 12px;">99.99%</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 6px 12px; font-weight: 700; border-right: 1px solid #e2e8f0;">Google Cloud</td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;"><span class="sketch-pill pill-blue">Cloud Storage</span></td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;">$20.00</td>
+                    <td style="padding: 6px 12px;">99.95%</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 12px; font-weight: 700; border-right: 1px solid #e2e8f0;">Microsoft Azure</td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;"><span class="sketch-pill pill-cyan">Blob Hot</span></td>
+                    <td style="padding: 6px 12px; border-right: 1px solid #e2e8f0;">$18.40</td>
+                    <td style="padding: 6px 12px;">99.90%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; font-size: 11px;">
+              <span class="action-txt">📥 Export CSV</span>
+              <span class="action-txt">{ } Export JSON</span>
+              <span class="action-txt">📝 Copy Markdown</span>
+              <span class="action-txt">🎯 Inspect Table</span>
+            </div>
+            <div class="m-caption">
+              ⚡ <em>Auto-detects HTML tables, parses headers & rows into structured objects with 1-click export to CSV, JSON, and Markdown!</em>
+            </div>
+          </div>
+
+          <!-- View: Leads & Contacts -->
+          <div class="m-view" id="m-leads">
+            <div class="sketch-list">
+              <div class="sketch-list-row">
+                <span class="row-icon">✉️</span>
+                <div class="row-text">
+                  <strong>press@company.com &bull; enterprise@sales.corp</strong>
+                  <small>Verified emails (filtered against .png, .js, and static file false-positives)</small>
+                </div>
+                <span class="sketch-pill pill-pink">EMAILS</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">📞</span>
+                <div class="row-text">
+                  <strong>+1 (800) 555-0199 &bull; +44 20 7946 0991</strong>
+                  <small>Phone numbers detected via tel: links and international regex</small>
+                </div>
+                <span class="sketch-pill pill-yellow">PHONES</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">🌐</span>
+                <div class="row-text">
+                  <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px;">
+                    <span class="sketch-pill pill-blue">LinkedIn</span>
+                    <span class="sketch-pill pill-orange">Twitter / X</span>
+                    <span class="sketch-pill pill-cyan">GitHub</span>
+                    <span class="sketch-pill pill-pink">Discord</span>
+                    <span class="sketch-pill pill-blue">Telegram</span>
+                    <span class="sketch-pill pill-yellow">YouTube</span>
+                  </div>
+                  <small style="margin-top: 4px; display: block;">12+ social channels automatically cataloged with profile handles</small>
+                </div>
+                <span class="sketch-pill pill-purple">PROFILES</span>
+              </div>
+              <div class="sketch-list-row">
+                <span class="row-icon">📝</span>
+                <div class="row-text">
+                  <strong>/api/v1/inquiry &bull; Method: POST</strong>
+                  <small>Form endpoints detected with input schemas: name, email, company, inquiry_type</small>
+                </div>
+                <span class="sketch-pill pill-emerald">FORM ENDPOINT</span>
+              </div>
+            </div>
+            <div class="m-caption">
+              ⚡ <em>Essential dossier for sales intelligence, B2B lead generation, competitive research, and security audits!</em>
+            </div>
+          </div>
+
+          <!-- View: AI & LLM Clean Markdown -->
+          <div class="m-view" id="m-ai">
+            <div style="border: 2px solid #000; border-radius: 6px; background: #1e1e2e; color: #cdd6f4; padding: 12px; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.6; max-height: 140px; overflow-y: auto;">
+              <span style="color: #f38ba8;"># OmniExtract Multi-Cloud Architecture</span><br>
+              <span style="color: #a6e3a1;">OmniExtract</span> is an enterprise-grade web data harvester...<br><br>
+              <span style="color: #89b4fa;">## Key Capabilities</span><br>
+              - *Dynamic Scroll Harvester* with live MutationObserver<br>
+              - *Table to CSV/JSON/MD* converter<br>
+              - *Sitemap Index recursion* with infinite nesting support<br>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; font-size: 11px;">
+              <span class="action-txt">📋 Copy for ChatGPT / Claude</span>
+              <span class="action-txt">📥 Save .md File</span>
+              <span class="action-txt">🧹 Strips Ads & Navigation</span>
+            </div>
+            <div class="m-caption">
+              ⚡ <em>Converts any noisy webpage into clean, token-efficient Markdown prompt context for AI and LLMs!</em>
             </div>
           </div>
 
@@ -558,6 +674,24 @@
           <div class="feat-icon">🗂️</div>
           <h3>Structured Cards & Feed Extractor</h3>
           <p>Extracts Titles, Images, Descriptions, Prices, and Links grouped together in the exact visual hierarchy they appear in on the page. Copy cards all-in-one, highlight them on the live page, or export to clean JSON arrays!</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">📊</div>
+          <h3>HTML Table Extractor</h3>
+          <p>Scans and parses HTML data tables into structured datasets with header mapping and row values. Features live scrollable inspection and 1-click export to CSV, JSON, and GitHub-flavored Markdown.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">📇</div>
+          <h3>Leads & Contacts Dossier</h3>
+          <p>Gathers verified business emails (filtered against media and script false-positives), phone numbers via regex/tel:, 12+ social networks (LinkedIn, Twitter, Discord, Telegram, YouTube), and HTML form endpoints with input schemas.</p>
+        </div>
+
+        <div class="sketch-card feat-card">
+          <div class="feat-icon">🤖</div>
+          <h3>AI & LLM Clean Markdown Exporter</h3>
+          <p>Strips ads, boilerplate, navigation bars, and cookie banners to convert core page content into pristine, token-efficient Markdown ready to drop straight into ChatGPT, Claude, or Gemini prompts.</p>
         </div>
 
         <div class="sketch-card feat-card">

@@ -276,6 +276,87 @@
       </div>
     </section>
 
+    <!-- Structured Data Tables Section -->
+    <section class="card" style="margin-top: 30px;">
+      <h3>📊 Multi-Cloud Storage Pricing & SLA Comparison Matrix</h3>
+      <p>Real-time comparative benchmark across enterprise object storage providers:</p>
+      <div style="overflow-x: auto; margin-top: 15px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+          <thead>
+            <tr style="background: #0f1626; border-bottom: 2px solid #38bdf8; color: #38bdf8;">
+              <th style="padding: 10px 14px;">Provider</th>
+              <th style="padding: 10px 14px;">Tier</th>
+              <th style="padding: 10px 14px;">Throughput</th>
+              <th style="padding: 10px 14px;">Price ($/TB/mo)</th>
+              <th style="padding: 10px 14px;">Availability SLA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #1e293b;">
+              <td style="padding: 10px 14px; font-weight: 600;">Amazon Web Services (S3)</td>
+              <td style="padding: 10px 14px;">Standard S3</td>
+              <td style="padding: 10px 14px;">100 Gbps</td>
+              <td style="padding: 10px 14px; color: #10b981;">$23.00</td>
+              <td style="padding: 10px 14px;">99.99%</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1e293b;">
+              <td style="padding: 10px 14px; font-weight: 600;">Google Cloud (GCS)</td>
+              <td style="padding: 10px 14px;">Standard Multi-Region</td>
+              <td style="padding: 10px 14px;">120 Gbps</td>
+              <td style="padding: 10px 14px; color: #10b981;">$20.00</td>
+              <td style="padding: 10px 14px;">99.95%</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1e293b;">
+              <td style="padding: 10px 14px; font-weight: 600;">Microsoft Azure</td>
+              <td style="padding: 10px 14px;">Hot Blob Storage</td>
+              <td style="padding: 10px 14px;">90 Gbps</td>
+              <td style="padding: 10px 14px; color: #10b981;">$20.80</td>
+              <td style="padding: 10px 14px;">99.99%</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #1e293b;">
+              <td style="padding: 10px 14px; font-weight: 600;">Cloudflare R2</td>
+              <td style="padding: 10px 14px;">Zero-Egress Tier</td>
+              <td style="padding: 10px 14px;">80 Gbps</td>
+              <td style="padding: 10px 14px; color: #10b981;">$15.00</td>
+              <td style="padding: 10px 14px;">99.90%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Enterprise Architecture Inquiry Form Section -->
+    <section class="card" style="margin-top: 30px;">
+      <h3>📋 Enterprise Architecture Inquiry Form</h3>
+      <p>Submit your cloud migration requirements to our solutions architects:</p>
+      <form action="/api/v1/inquiry" method="POST" id="inquiryForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px;">
+        <input type="hidden" name="_csrf_token" value="c8f9a2b4-e1d7-4b90-9c23-7fa512398ab7">
+        <div>
+          <label style="font-size: 11px; color: #94a3b8;">Full Name</label>
+          <input type="text" name="fullName" placeholder="Jane Doe" required style="width: 100%; padding: 8px 12px; background: #0f1626; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: #94a3b8;">Work Email</label>
+          <input type="email" name="workEmail" placeholder="jane@enterprise.com" required style="width: 100%; padding: 8px 12px; background: #0f1626; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: #94a3b8;">Primary Cloud Platform</label>
+          <select name="targetCloud" style="width: 100%; padding: 8px 12px; background: #0f1626; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-top: 4px;">
+            <option value="aws">Amazon Web Services</option>
+            <option value="gcp">Google Cloud Platform</option>
+            <option value="azure">Microsoft Azure</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: #94a3b8;">Monthly Storage Volume</label>
+          <input type="text" name="monthlyVolume" placeholder="50+ Terabytes" style="width: 100%; padding: 8px 12px; background: #0f1626; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-top: 4px;">
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <button type="button" class="btn" style="border: none; cursor: pointer;">Submit Architecture Request</button>
+        </div>
+      </form>
+    </section>
+
     <!-- Dynamic Infinite-Scroll Feed Container -->
     <section class="card" style="margin-top: 30px;">
       <h3>⚡ Dynamic Infinite-Scroll Feed (Simulated Live Loading)</h3>
@@ -349,8 +430,14 @@
   <!-- Footer with Contact Info -->
   <footer>
     <p><strong>OmniCloud Technologies Inc.</strong> &bull; Multi-Cloud Systems</p>
-    <p>Contact: <a href="mailto:support@omnicloud.io" style="color: #38bdf8;">support@omnicloud.io</a> | Security: <a href="mailto:security@omnicloud.io" style="color: #38bdf8;">security@omnicloud.io</a> | Phone: <a href="tel:+18005550199" style="color: #38bdf8;">+1 (800) 555-0199</a></p>
+    <p>Contact: <a href="mailto:support@omnicloud.io" style="color: #38bdf8;">support@omnicloud.io</a> | Security: <a href="mailto:security@omnicloud.io" style="color: #38bdf8;">security@omnicloud.io</a> | Phone: <a href="tel:+18005550199" style="color: #38bdf8;">+1 (800) 555-0199</a> | Sales: <a href="tel:+18005550244" style="color: #38bdf8;">+1 (800) 555-0244</a></p>
     <p>Social: 
+      <a href="https://twitter.com/omnicloud_tech" style="color: #38bdf8; margin: 0 5px;">Twitter/X</a>
+      <a href="https://linkedin.com/company/omnicloud-technologies" style="color: #38bdf8; margin: 0 5px;">LinkedIn</a>
+      <a href="https://github.com/omnicloud-org" style="color: #38bdf8; margin: 0 5px;">GitHub</a>
+      <a href="https://discord.gg/omnicloud-community" style="color: #38bdf8; margin: 0 5px;">Discord</a>
+      <a href="https://t.me/omnicloud_alerts" style="color: #38bdf8; margin: 0 5px;">Telegram</a>
+      <a href="https://youtube.com/@omnicloud" style="color: #38bdf8; margin: 0 5px;">YouTube</a>
       <a href="https://twitter.com/omnicloud" style="color: #94a3b8; margin: 0 8px;">Twitter / X</a>
       <a href="https://linkedin.com/company/omnicloud" style="color: #94a3b8; margin: 0 8px;">LinkedIn</a>
       <a href="https://github.com/omnicloud-org" style="color: #94a3b8; margin: 0 8px;">GitHub</a>

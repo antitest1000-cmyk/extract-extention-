@@ -21,6 +21,8 @@
     images: new Map(),
     media: new Map(),
     cards: new Map(),
+    tables: new Map(),
+    forms: new Map(),
     cloudLinks: new Map(),
     links: new Map(),
     emails: new Set(),
@@ -29,6 +31,8 @@
     colors: new Set(),
     fonts: new Set()
   };
+  store.tables = store.tables || new Map();
+  store.forms = store.forms || new Map();
   window.__omniExtractStore = store;
 
   // Auto-scroll state
@@ -42,6 +46,7 @@
   };
 
   // State & counters (declared before any scan functions execute)
+  let tableIdCounter = 1;
 
 
 
@@ -95,6 +100,12 @@
       return true;
     }
 
+    if (request.action === 'HIGHLIGHT_TABLE') {
+      highlightTable(request.tableId);
+      sendResponse({ success: true });
+      return true;
+    }
+
     if (request.action === 'START_PICKER') {
       startInteractivePicker();
       sendResponse({ success: true });
@@ -109,8 +120,6 @@
     runDeepScan();
   }
 
-  let activeMutationObserver = null;
-  let activeScrollListener = null;
 
   /**
    * Setup MutationObserver and Scroll Watchers to catch infinite scroll / lazy-loaders
@@ -201,6 +210,8 @@
     extractImagesIntoStore();
     extractMediaIntoStore();
     extractCardsIntoStore();
+    extractTablesIntoStore();
+    extractFormsIntoStore();
     extractCloudLinksIntoStore();
     extractLinksIntoStore();
     extractContactsIntoStore();
@@ -220,6 +231,9 @@
       images: Array.from(store.images.values()),
       media: Array.from(store.media.values()),
       cards: Array.from(store.cards.values()),
+      tables: Array.from(store.tables.values()),
+      forms: Array.from(store.forms.values()),
+      cleanMarkdown: extractCleanPageMarkdown(),
       cloudLinks: Array.from(store.cloudLinks.values()),
       links: Array.from(store.links.values()),
       contacts: {
@@ -758,15 +772,38 @@
     });
 
     const bodyText = document.body ? document.body.innerText : '';
+
+    // Extract phone numbers from body text
+    const phoneMatches = bodyText.match(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g) || [];
+    phoneMatches.forEach(p => {
+      const clean = p.trim();
+      if (clean.length >= 7 && clean.length <= 24 && /\d{4,}/.test(clean.replace(/\D/g, ''))) {
+        store.phones.add(clean);
+      }
+    });
+
+    // Extract emails from body text (excluding image/script extensions)
     const emailMatches = bodyText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
-    emailMatches.slice(0, 15).forEach(em => store.emails.add(em.toLowerCase()));
+    emailMatches.forEach(em => {
+      const lower = em.toLowerCase();
+      if (!lower.endsWith('.png') && !lower.endsWith('.jpg') && !lower.endsWith('.webp') && !lower.endsWith('.js') && !lower.endsWith('.svg')) {
+        store.emails.add(lower);
+      }
+    });
 
     const socialPlatforms = [
       { name: 'Twitter/X', regex: /(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]{1,30})/i },
       { name: 'LinkedIn', regex: /linkedin\.com\/(?:company|in)\/([a-zA-Z0-9_-]+)/i },
       { name: 'GitHub', regex: /github\.com\/([a-zA-Z0-9_-]+)/i },
+      { name: 'Discord', regex: /(?:discord\.gg|discord\.com\/invite)\/([a-zA-Z0-9_-]+)/i },
+      { name: 'Telegram', regex: /(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]+)/i },
+      { name: 'WhatsApp', regex: /(?:wa\.me|api\.whatsapp\.com\/send\?phone=)(\+?[0-9]+)/i },
       { name: 'Instagram', regex: /instagram\.com\/([a-zA-Z0-9_.-]+)/i },
-      { name: 'YouTube', regex: /(?:youtube\.com\/(?:@|c\/|channel\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/i }
+      { name: 'YouTube', regex: /(?:youtube\.com\/(?:@|c\/|channel\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/i },
+      { name: 'Facebook', regex: /(?:facebook\.com|fb\.com)\/([a-zA-Z0-9_.-]+)/i },
+      { name: 'Reddit', regex: /reddit\.com\/(?:r|user)\/([a-zA-Z0-9_]+)/i },
+      { name: 'TikTok', regex: /tiktok\.com\/@([a-zA-Z0-9_.-]+)/i },
+      { name: 'Medium', regex: /medium\.com\/@?([a-zA-Z0-9_.-]+)/i }
     ];
 
     document.querySelectorAll('a[href]').forEach(a => {
@@ -823,7 +860,6 @@
    * Detects composite containers with title, image, description, links, and badges
    * =========================================================================
    */
-  let cardIdCounter = 1;
 
   function extractBestImageUrl(el) {
     if (!el) return '';
@@ -1117,8 +1153,6 @@
    * INTERACTIVE CONTAINER & CARD PICKER (Point & Click)
    * =========================================================================
    */
-  let pickerActive = false;
-  let hoveredEl = null;
 
   function startInteractivePicker() {
     if (pickerActive) return;

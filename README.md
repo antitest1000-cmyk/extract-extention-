@@ -12,7 +12,33 @@
 - Filter images by format.
 - 1-click preview in new tab, 1-click copy image URL, single download, or **batch download** all images.
 
-### 2. 📊 Meta, SEO & Description Tags
+### 2. 🗂️ Structured Cards & Feeds Extractor
+- Extracts grouped data units (e-commerce products, blog articles, feed cards) with Title, Image, Description, Price, and Link together in exact visual order.
+- One-click **Copy All**, copy as structured JSON, or click **Inspect** to highlight and jump to the card on the live web page.
+
+### 3. 📊 HTML Table Extractor (CSV, JSON & Markdown)
+- Auto-detects all `<table>` elements and structured data grids.
+- Parses headers (`<th>`) and rows (`<tr>/<td>`) into clean key-value records.
+- Live scrollable table preview in popup and full viewer.
+- 1-click export to **CSV**, **JSON**, and **GitHub-flavored Markdown** tables.
+- Click **Inspect** to highlight the table directly on the active webpage.
+
+### 4. 📇 Leads & Contacts Dossier
+- **Emails**: Extracts email addresses with smart filtration removing false-positives from `.png`, `.jpg`, `.svg`, `.js`, and `.css` files.
+- **Phone Numbers**: Extracts international and domestic phone numbers via `tel:` links and robust regex.
+- **Social Profiles**: Detects and organizes 12+ social networks: LinkedIn, Twitter/X, GitHub, Discord, Telegram, WhatsApp, YouTube, Instagram, Facebook, Reddit, TikTok, Medium.
+- **HTML Form Endpoints**: Catalogs form actions, submission methods (`POST`/`GET`), and input fields with names, types, placeholders, and required flags.
+
+### 5. 🤖 AI & LLM Clean Markdown Exporter
+- Strips noisy page elements (navigation headers, sidebars, advertisements, footers, cookie banners).
+- Converts core readable article/page content into pristine, prompt-ready **Markdown**.
+- 1-click **"📋 Copy for AI"** or **"📥 Save .md"** to drop directly into ChatGPT, Claude, or Gemini prompts without wasting tokens.
+
+### 6. ⚡ Dynamic Feed & Auto-Scroll Harvester
+- Live `MutationObserver` automatically detects new elements as content loads dynamically.
+- Built-in automated scroll harvester scrolls down and extracts elements on infinite-scroll pages (Instagram, Twitter, Pinterest, Unsplash), preserving them even when virtualized DOM elements unmount.
+
+### 7. 📊 Meta, SEO & Description Tags
 - Page Title, Meta Description, Keywords, Author, Robots, Canonical URL, Charset, and Language.
 - **OpenGraph & Twitter Cards**: `og:title`, `og:description`, `og:image`, `og:site_name`, `twitter:card`, `twitter:image`.
 - Interactive OpenGraph visual card preview.
@@ -21,7 +47,7 @@
 - Word count and estimated reading time statistics.
 - **Tech Stack Detection**: React, Next.js, Vue, Nuxt, Angular, WordPress, Shopify, Webflow, Tailwind CSS, Bootstrap, jQuery, Google Analytics.
 
-### 3. ☁️ Cloud & Infrastructure Link Detection
+### 8. ☁️ Cloud & Infrastructure Link Detection
 Automatically scans page DOM, scripts, resource tags, and inline JavaScript code to detect and categorize cloud service endpoints:
 - **Amazon Web Services (AWS)**: S3 Buckets (`*.s3.amazonaws.com`, `s3://`), CloudFront CDN (`*.cloudfront.net`), API Gateway (`*.execute-api.*.amazonaws.com`), Lambda Function URLs, Elastic Beanstalk.
 - **Google Cloud Platform (GCP)**: Cloud Storage (`storage.googleapis.com/*`), Firebase (`*.firebaseio.com`, `*.web.app`, `*.firebaseapp.com`), Cloud Run (`*.run.app`), App Engine (`*.appspot.com`), Cloud Functions.
@@ -31,7 +57,7 @@ Automatically scans page DOM, scripts, resource tags, and inline JavaScript code
 - **Source Repositories**: GitHub (`github.com`, `raw.githubusercontent.com`), GitLab, Bitbucket.
 - **Internal APIs**: Discovers REST (`/api/v*`, `.json`) and GraphQL endpoints from inline scripts.
 
-### 4. 🗺️ Whole Website XML Sitemap Extractor
+### 9. 🗺️ Whole Website XML Sitemap Extractor
 - Automatic discovery: checks `robots.txt` for `Sitemap:` directives and probes standard paths (`/sitemap.xml`, `/sitemap_index.xml`, `/wp-sitemap.xml`, `/sitemap/sitemap.xml`).
 - Supports custom sitemap URL input for custom-named sitemaps.
 - **Recursive Sitemap Index Traversal**: If the sitemap contains nested `<sitemapindex>` child files (e.g. `sitemap-posts.xml`, `sitemap-products.xml`), it follows and parses all child sitemaps automatically.
@@ -39,12 +65,12 @@ Automatically scans page DOM, scripts, resource tags, and inline JavaScript code
 - Filter sitemap URLs with instant keyword search.
 - Export to `.txt` (clean URL list ready for wget / curl / python crawlers) or `.csv`.
 
-### 5. 🕷️ In-Extension Multi-Page Site Crawler (Spider)
+### 10. 🕷️ In-Extension Multi-Page Site Crawler (Spider)
 - Spider across internal pages of the current website up to a configured page limit (10, 25, 50, 100 pages).
 - Aggregates images, links, cloud service assets, and contact emails across every visited page.
 - Real-time progress bar with live status indicators.
 
-### 6. 🖥️ Full-Screen Dashboard (Viewer)
+### 11. 🖥️ Full-Screen Dashboard (Viewer)
 - Dedicated full-width dashboard tab (`viewer.html`) for analyzing large datasets (thousands of sitemap URLs or hundreds of images).
 - Instant global search filter across all columns.
 - Formatted raw JSON tree viewer with 1-click copy.
