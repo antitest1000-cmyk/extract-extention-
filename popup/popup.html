@@ -44,41 +44,51 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
       <button class="tab-btn active" data-tab="tab-overview">
+        <span class="tab-icon">📊</span>
         <span>Overview</span>
       </button>
       <button class="tab-btn" data-tab="tab-images">
+        <span class="tab-icon">🖼️</span>
         <span>Images</span>
         <span class="badge" id="badgeImages">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-media">
-        <span>Video & Audio</span>
+        <span class="tab-icon">🎬</span>
+        <span>Media</span>
         <span class="badge badge-rose" id="badgeMedia">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-cards">
+        <span class="tab-icon">🗂️</span>
         <span>Cards</span>
         <span class="badge badge-amber" id="badgeCards">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-tables">
+        <span class="tab-icon">📋</span>
         <span>Tables</span>
         <span class="badge badge-emerald" id="badgeTables">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-leads">
-        <span>Leads & Contacts</span>
+        <span class="tab-icon">📇</span>
+        <span>Leads</span>
         <span class="badge badge-cyan" id="badgeLeads">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-cloud">
-        <span>Cloud & APIs</span>
+        <span class="tab-icon">☁️</span>
+        <span>Cloud</span>
         <span class="badge badge-accent" id="badgeCloud">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-links">
+        <span class="tab-icon">🔗</span>
         <span>Links</span>
-        <span class="badge" id="badgeLinks">0</span>
+        <span class="badge badge-blue" id="badgeLinks">0</span>
       </button>
       <button class="tab-btn" data-tab="tab-sitemap">
+        <span class="tab-icon">🗺️</span>
         <span>Sitemap</span>
         <span class="badge badge-purple" id="badgeSitemap">XML</span>
       </button>
       <button class="tab-btn" data-tab="tab-crawler">
+        <span class="tab-icon">🕷️</span>
         <span>Spider</span>
         <span class="badge badge-green">Site</span>
       </button>
@@ -157,51 +167,68 @@
         </div>
 
         <div class="metrics-grid">
-          <div class="metric-box">
+          <div class="metric-box metric-words">
             <div class="metric-num" id="statWords">0</div>
             <div class="metric-label">Words</div>
           </div>
-          <div class="metric-box">
-            <div class="metric-num" id="statCards">0</div>
-            <div class="metric-label">Cards</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-num" id="statTables">0</div>
-            <div class="metric-label">Tables</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-num" id="statLeads">0</div>
-            <div class="metric-label">Leads</div>
-          </div>
-          <div class="metric-box">
+          <div class="metric-box metric-images">
             <div class="metric-num" id="statImages">0</div>
             <div class="metric-label">Images</div>
           </div>
-          <div class="metric-box">
-            <div class="metric-num" id="statMedia">0</div>
-            <div class="metric-label">Video/Audio</div>
+          <div class="metric-box metric-cards">
+            <div class="metric-num" id="statCards">0</div>
+            <div class="metric-label">Cards</div>
           </div>
-          <div class="metric-box">
+          <div class="metric-box metric-tables">
+            <div class="metric-num" id="statTables">0</div>
+            <div class="metric-label">Tables</div>
+          </div>
+          <div class="metric-box metric-leads">
+            <div class="metric-num" id="statLeads">0</div>
+            <div class="metric-label">Leads</div>
+          </div>
+          <div class="metric-box metric-media">
+            <div class="metric-num" id="statMedia">0</div>
+            <div class="metric-label">Media</div>
+          </div>
+          <div class="metric-box metric-cloud">
             <div class="metric-num" id="statCloud">0</div>
-            <div class="metric-label">Cloud Links</div>
+            <div class="metric-label">Cloud</div>
+          </div>
+          <div class="metric-box metric-links">
+            <div class="metric-num" id="statLinks">0</div>
+            <div class="metric-label">Links</div>
           </div>
         </div>
 
         <!-- AI & LLM Clean Markdown Exporter -->
-        <div class="section-card" style="border: 1px solid rgba(56, 189, 248, 0.3); background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(14, 165, 233, 0.08) 100%);">
+        <div class="section-card ai-markdown-card">
           <div class="card-header">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 15px;">🤖</span>
-              <h3 style="color: #38bdf8;">Clean Content for AI / LLMs (Markdown)</h3>
+            <div class="ai-header-left">
+              <span class="ai-badge-icon">🤖</span>
+              <div>
+                <h3 class="ai-title">AI & LLM Prompt Context</h3>
+                <span class="ai-subtitle">Strips HTML noise & formats as clean Markdown</span>
+              </div>
             </div>
-            <span class="chip chip-blue">Prompt-Ready</span>
+            <span class="chip chip-ai" id="lblAiTokenCount">Prompt-Ready</span>
           </div>
-          <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
-            Converts this page into clean, ad-free Markdown (with headings, links & lists) formatted to paste into ChatGPT, Claude, or Gemini.
-          </p>
-          <div style="display: flex; gap: 8px;">
-            <button id="btnCopyMarkdownAi" class="btn-xs btn-primary" style="flex: 1;">📋 Copy for AI</button>
-            <button id="btnDownloadMarkdownAi" class="btn-xs btn-outline" style="border-color: #38bdf8; color: #38bdf8;">📥 Save .md</button>
+          <div class="ai-preview-snippet" id="aiSnippetPreview">
+            <code># Extracted Page Content &bull; Headings, Lists & Links formatted for LLMs</code>
+          </div>
+          <div class="ai-actions-row">
+            <button id="btnCopyMarkdownAi" class="btn-xs btn-primary ai-copy-btn">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+              📋 Copy for ChatGPT / Claude
+            </button>
+            <button id="btnDownloadMarkdownAi" class="btn-xs btn-outline ai-dl-btn">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              📥 Save .md
+            </button>
           </div>
         </div>
 

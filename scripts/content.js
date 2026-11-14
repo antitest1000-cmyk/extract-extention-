@@ -45,8 +45,13 @@
     floatingBadge: null
   };
 
-  // State & counters (declared before any scan functions execute)
-  let tableIdCounter = 1;
+  // State & counters (declared at top before any scan functions execute)
+  let cardIdCounter = (window.__omniCardIdCounter = window.__omniCardIdCounter || 1);
+  let tableIdCounter = (window.__omniTableIdCounter = window.__omniTableIdCounter || 1);
+  let pickerActive = false;
+  let hoveredEl = null;
+  let activeMutationObserver = null;
+  let activeScrollListener = null;
 
 
 
@@ -1023,6 +1028,7 @@
       let cardId = el.getAttribute('data-omni-card-id');
       if (!cardId) {
         cardId = 'omni_card_' + (cardIdCounter++);
+        window.__omniCardIdCounter = cardIdCounter;
         el.setAttribute('data-omni-card-id', cardId);
       }
 
@@ -1146,6 +1152,223 @@
         if (!existing.badge && card.badge) existing.badge = card.badge;
       }
     });
+  }
+
+
+  /**
+   * =========================================================================
+   * DATA TABLES & HTML FORMS EXTRACTORS
+   * =========================================================================
+   */
+
+  function extractTablesIntoStore() {
+    try {
+      const tableElements = document.querySelectorAll('table, [role="table"]');
+      tableElements.forEach((tableEl) => {
+        if (tableEl.offsetWidth === 0 && tableEl.offsetHeight === 0) return;
+
+        let tableId = tableEl.getAttribute('data-omni-table-id');
+        if (!tableId) {
+          tableId = 'omni_table_' + (tableIdCounter++);
+          window.__omniTableIdCounter = tableIdCounter;
+          tableEl.setAttribute('data-omni-table-id', tableId);
+        }
+
+        let caption = '';
+        const captionEl = tableEl.querySelector('caption');
+        if (captionEl) {
+          caption = (captionEl.innerText || captionEl.textContent || '').trim();
+        } else {
+          const prev = tableEl.previousElementSibling;
+          if (prev && /^h[1-6]$/i.test(prev.tagName)) {
+            caption = (prev.innerText || prev.textContent || '').trim();
+          }
+        }
+
+        let headers = [];
+        const ths = tableEl.querySelectorAll('thead th, tr:first-child th');
+        if (ths.length > 0) {
+          ths.forEach((th, idx) => {
+            const text = (th.innerText || th.textContent || '').trim();
+            headers.push(text || `Column ${idx + 1}`);
+          });
+        }
+
+        const rows = [];
+        const trs = tableEl.querySelectorAll('tbody tr, tr');
+        trs.forEach((tr, rowIdx) => {
+          if (ths.length > 0 && tr.parentElement && tr.parentElement.tagName.toLowerCase() === 'thead') return;
+          if (ths.length > 0 && rowIdx === 0 && tr.querySelectorAll('td').length === 0) return;
+
+          const cells = tr.querySelectorAll('td, th');
+          if (cells.length === 0) return;
+
+          const rowValues = [];
+          const rowObj = {};
+
+          cells.forEach((cell, colIdx) => {
+            const val = (cell.innerText || cell.textContent || '').trim().replace(/\s+/g, ' ');
+            rowValues.push(val);
+            const colHeader = headers[colIdx] || `Col_${colIdx + 1}`;
+            rowObj[colHeader] = val;
+          });
+
+          if (headers.length === 0 && rowIdx === 0) {
+            headers = rowValues.map((v, i) => v || `Column ${i + 1}`);
+          } else if (rowValues.some(v => Boolean(v))) {
+            rows.push({
+              values: rowValues,
+              object: rowObj
+            });
+          }
+        });
+
+        if (rows.length === 0 && headers.length === 0) return;
+        if (headers.length === 0 && rows.length > 0) {
+          const maxCols = Math.max(...rows.map(r => r.values.length));
+          for (let i = 0; i < maxCols; i++) headers.push(`Column ${i + 1}`);
+        }
+
+        const escapeCsv = (str) => {
+          if (!str) return '""';
+          const s = String(str).replace(/"/g, '""');
+          return `"${s}"`;
+        };
+        let csv = headers.map(escapeCsv).join(',') + '\n';
+        rows.forEach(r => {
+          csv += r.values.map(escapeCsv).join(',') + '\n';
+        });
+
+        let markdown = '| ' + headers.join(' | ') + ' |\n';
+        markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n';
+        rows.forEach(r => {
+          const paddedVals = headers.map((_, i) => (r.values[i] || '').replace(/\|/g, '\\|'));
+          markdown += '| ' + paddedVals.join(' | ') + ' |\n';
+        });
+
+        store.tables.set(tableId, {
+          id: tableId,
+          caption: caption || `Table #${tableId.split('_').pop()}`,
+          headers: headers,
+          rowsCount: rows.length,
+          colsCount: headers.length,
+          rows: rows.map(r => r.object),
+          rawRows: rows.map(r => r.values),
+          csv: csv,
+          markdown: markdown,
+          timestamp: new Date().toISOString()
+        });
+      });
+    } catch(err) {
+      console.warn('[OmniExtract] Table scan err:', err);
+    }
+  }
+
+  function extractFormsIntoStore() {
+    try {
+      const formElements = document.querySelectorAll('form');
+      formElements.forEach((formEl, idx) => {
+        const formId = formEl.id || `form_${idx + 1}`;
+        let action = formEl.getAttribute('action') || window.location.href;
+        try {
+          action = new URL(action, window.location.href).href;
+        } catch (e) {}
+
+        const method = (formEl.getAttribute('method') || 'GET').toUpperCase();
+        const name = formEl.getAttribute('name') || formId;
+
+        const inputs = [];
+        const fieldEls = formEl.querySelectorAll('input, select, textarea');
+        fieldEls.forEach((field) => {
+          const fType = field.getAttribute('type') || (field.tagName.toLowerCase() === 'textarea' ? 'textarea' : 'text');
+          if (fType === 'hidden' && !field.name) return;
+
+          inputs.push({
+            name: field.getAttribute('name') || field.id || '(unnamed)',
+            type: fType,
+            placeholder: field.getAttribute('placeholder') || '',
+            required: field.hasAttribute('required'),
+            value: field.value ? (fType === 'password' ? '••••••' : field.value.slice(0, 50)) : ''
+          });
+        });
+
+        store.forms.set(formId, {
+          id: formId,
+          name: name,
+          action: action,
+          method: method,
+          fieldsCount: inputs.length,
+          fields: inputs,
+          timestamp: new Date().toISOString()
+        });
+      });
+    } catch(err) {
+      console.warn('[OmniExtract] Form scan err:', err);
+    }
+  }
+
+  function extractCleanPageMarkdown() {
+    try {
+      const clone = document.body ? document.body.cloneNode(true) : null;
+      if (!clone) return '';
+
+      const stripSelectors = [
+        'script', 'style', 'noscript', 'iframe', 'svg', 'canvas',
+        'nav', 'header', 'footer', 'aside',
+        '[class*="cookie" i]', '[id*="cookie" i]',
+        '[class*="banner" i]', '[class*="advert" i]', '[class*="popup" i]',
+        '[class*="modal" i]', '#__omni_floating_harvester', '#__omni_picker_banner'
+      ];
+      clone.querySelectorAll(stripSelectors.join(', ')).forEach(el => el.remove());
+
+      const lines = [];
+      lines.push(`# ${document.title || 'Extracted Web Page'}`);
+      lines.push(`> Source: [${window.location.href}](${window.location.href})\n`);
+
+      const main = clone.querySelector('main, article, [role="main"]') || clone;
+
+      const walker = document.createTreeWalker(main, NodeFilter.SHOW_ELEMENT);
+      let curr = walker.currentNode;
+
+      while (curr) {
+        const tag = curr.tagName.toLowerCase();
+        const text = (curr.innerText || curr.textContent || '').trim();
+
+        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
+          const level = '#'.repeat(parseInt(tag[1]));
+          if (text) lines.push(`\n${level} ${text}\n`);
+        } else if (tag === 'p' && text.length > 0) {
+          lines.push(`\n${text}\n`);
+        } else if (tag === 'li' && text.length > 0) {
+          lines.push(`- ${text}`);
+        } else if (tag === 'blockquote' && text.length > 0) {
+          lines.push(`> ${text}\n`);
+        } else if (tag === 'pre' && text.length > 0) {
+          lines.push(`\n\`\`\`\n${text}\n\`\`\`\n`);
+        }
+        curr = walker.nextNode();
+      }
+
+      return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function highlightTable(tableId) {
+    if (!tableId) return;
+    const el = document.querySelector(`[data-omni-table-id="${tableId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const origOutline = el.style.outline;
+      const origShadow = el.style.boxShadow;
+      el.style.outline = '4px solid #10b981';
+      el.style.boxShadow = '0 0 30px rgba(16, 185, 129, 0.9)';
+      setTimeout(() => {
+        el.style.outline = origOutline;
+        el.style.boxShadow = origShadow;
+      }, 3000);
+    }
   }
 
   /**

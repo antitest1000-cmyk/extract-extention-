@@ -57,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
     statTables: document.getElementById('statTables'),
     statLeads: document.getElementById('statLeads'),
     statImages: document.getElementById('statImages'),
+    statMedia: document.getElementById('statMedia'),
+    statCloud: document.getElementById('statCloud'),
+    statLinks: document.getElementById('statLinks'),
+    lblAiTokenCount: document.getElementById('lblAiTokenCount'),
+    aiSnippetPreview: document.getElementById('aiSnippetPreview'),
     btnCopyMarkdownAi: document.getElementById('btnCopyMarkdownAi'),
     btnDownloadMarkdownAi: document.getElementById('btnDownloadMarkdownAi'),
     tablesCountLabel: document.getElementById('tablesCountLabel'),
@@ -254,6 +259,19 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.statImages.textContent = (data.images && data.images.length) || 0;
     elements.statMedia.textContent = (data.media && data.media.length) || 0;
     elements.statCloud.textContent = (data.cloudLinks && data.cloudLinks.length) || 0;
+    if (elements.statLinks) elements.statLinks.textContent = (data.links && data.links.length) || 0;
+
+    // AI Markdown preview and token count
+    if (data.cleanMarkdown) {
+      const approxTokens = Math.round(data.cleanMarkdown.length / 4);
+      if (elements.lblAiTokenCount) {
+        elements.lblAiTokenCount.textContent = `~${approxTokens} tokens • Prompt Ready`;
+      }
+      if (elements.aiSnippetPreview) {
+        const previewText = data.cleanMarkdown.split('\n').filter(Boolean).slice(0, 3).join(' • ');
+        elements.aiSnippetPreview.innerHTML = `<code>${escapeHtml(previewText || '# Ready for LLMs')}</code>`;
+      }
+    }
 
     // Color Palette & Fonts
     renderDesignAssets(data.designAssets);
@@ -1408,9 +1426,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupEventListeners() {
     // Refresh
     elements.btnRefresh.addEventListener('click', () => {
+      elements.btnRefresh.classList.add('spinning');
+      setTimeout(() => elements.btnRefresh.classList.remove('spinning'), 700);
       loadActiveTabData();
       showToast('Refreshing extracted data...');
     });
+
+    // Domain copy
+    if (elements.currentDomain) {
+      elements.currentDomain.style.cursor = 'pointer';
+      elements.currentDomain.title = 'Click to copy active URL';
+      elements.currentDomain.addEventListener('click', () => {
+        if (state.pageData && state.pageData.url) {
+          navigator.clipboard.writeText(state.pageData.url).then(() => {
+            showToast(`Copied URL: ${state.pageData.url}`);
+          });
+        }
+      });
+    }
 
     // Open Viewer
     elements.btnOpenViewer.addEventListener('click', () => openInViewer(state.pageData));
@@ -1600,7 +1633,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!state.pageData) return;
       const md = state.pageData.cleanMarkdown || `# ${document.title}\n\n${state.activeUrl}`;
       copyToClipboard(md);
-      showToast('Copied Clean Markdown ready for AI / LLMs!');
+      showToast('📋 Copied Clean Markdown ready for AI / LLMs!');
+      const origHtml = elements.btnCopyMarkdownAi.innerHTML;
+      elements.btnCopyMarkdownAi.innerHTML = '✓ Copied for AI!';
+      setTimeout(() => {
+        elements.btnCopyMarkdownAi.innerHTML = origHtml;
+      }, 2000);
     });
 
     elements.btnDownloadMarkdownAi?.addEventListener('click', () => {
